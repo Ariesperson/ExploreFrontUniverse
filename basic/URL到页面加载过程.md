@@ -18,7 +18,7 @@
 
 ​	构建Dom树
 
-​    构建CSS树
+​   构建CSS树
 
 ​	构建render树
 
