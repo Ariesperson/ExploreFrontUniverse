@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .sanjiao{
+        position: absolute;
+        width: 0px;
+        height: 0px;
+        border-right: 100px solid transparent;
+        border-left: 100px solid transparent;
+        border-top: 100px solid transparent;
+        border-bottom: 100px solid #ff0;
+    }
+    #star {
+      width: 0;
+      height: 0;
+      margin: 100px 10px;
+      color: red;
+      position: relative;
+      display: block;
+      border-right: 100px solid transparent;
+      border-bottom: 70px solid red;
+      border-left: 100px solid transparent;
+      -moz-transform: rotate(35deg);
+      -webkit-transform: rotate(35deg);
+      -ms-transform: rotate(35deg);
+      -o-transform: rotate(35deg);
+      /* background-color: black; */
+    }
+
+    #star:before {
+      height: 0;
+      width: 0;
+      position: absolute;
+      display: block;
+      top: -45px;
+      left: -65px;
+      border-bottom: 80px solid red;
+      border-left: 30px solid transparent;
+      border-right: 30px solid transparent;
+      content: '';
+      -webkit-transform: rotate(-35deg);
+      -moz-transform: rotate(-35deg);
+      -ms-transform: rotate(-35deg);
+      -o-transform: rotate(-35deg);
+      /* background-color: black; */
+    }
+
+    #star:after {
+      content: '';
+      width: 0;
+      height: 0;
+      position: absolute;
+      display: block;
+      top: 3px;
+      left: -105px;
+      color: red;
+      border-right: 100px solid transparent;
+      border-bottom: 70px solid red;
+      border-left: 100px solid transparent;
+      -webkit-transform: rotate(-70deg);
+      -moz-transform: rotate(-70deg);
+      -ms-transform: rotate(-70deg);
+      -o-transform: rotate(-70deg);
+      /* background-color: black; */
+    }
+</style>
+<body>
+    <div class="sanjiao"></div>
+    <div id="star"></div>
+</body>
+</html>
