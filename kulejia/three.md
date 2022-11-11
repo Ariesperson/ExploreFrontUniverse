@@ -38,7 +38,7 @@ WeakMap and WeakSet：
 
 ## 请用es5实现一个继承有哪些方式
 原型链继承
-```
+```javascript
 function parent1{
   this.name=‘parent1’
   this.play=[1,2]
@@ -50,7 +50,7 @@ child1.prototype=new parent1()
 var ch1 = new child1()
 ```
 构造器继承
-```
+```javascript
 function parent2(){
   this.name=‘parent2’
   this.play=[1,2]
@@ -65,7 +65,7 @@ function child2(){
 child2.prototype.constructor=parent2
 ```
 组合继承
-```
+```javascript
 
 function parent3(){
   this.name=‘parent3’
