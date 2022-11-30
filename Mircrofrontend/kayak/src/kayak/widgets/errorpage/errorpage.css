@@ -1,0 +1,46 @@
+.errorpage-mod {
+  position: fixed;
+  top: 44px;
+  background-color: #fff;
+  width: 100%;
+  z-index: 902;
+}
+
+.errorpage-mod .pannel {
+  color: #979797;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  padding-top: 64px;
+}
+
+.errorpage-mod .pannel .img {
+  width: 100px;
+  height: 100px;
+  margin: 20% auto 0;
+  background: url("kayak/src/kayak/widgets/errorpage/nonet.png") no-repeat center;
+  background-size: contain;
+}
+
+.errorpage-mod .noservice .img {
+  position: relative;
+  background: url("kayak/src/kayak/widgets/errorpage/noservice.png") no-repeat center;
+  background-size: contain;
+}
+
+.errorpage-mod .pannel .info {
+  margin-bottom: 30px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.errorpage-mod .pannel .btn {
+  display: inline-block;
+  background-color: transparent;
+  border-radius: 4px;
+  color: #ff7b38;
+  border: 1px solid #ff7b38;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 14px;
+}

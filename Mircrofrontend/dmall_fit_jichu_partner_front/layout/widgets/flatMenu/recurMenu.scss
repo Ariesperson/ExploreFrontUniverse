@@ -1,0 +1,64 @@
+.recur-menu {
+  .active-child-item {
+    color: #0f62fe !important;
+    font-weight: bold !important;
+  }
+  .active-item {
+   
+    background-color: #ebf4ff;
+    border-radius: 2px;
+    
+  }
+  .recur-menu-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    position: relative;
+    height: 32px;
+    padding:8px;
+    &:hover {
+      cursor: pointer;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 2px;
+    }
+    // &:hover::after {
+    //   content: "";
+    //   height: 32px;
+    //   width: 176px;
+    //   background: rgba(0, 0, 0, 0.08);
+    //   border-radius: 2px;
+    //   position: absolute;
+    //   left: -8px;
+    //   top: -6px;
+    // }
+    .menu-level-sub {
+      color: #191919;
+      font-weight: bold;
+      font-size: 12px;
+      flex: 1;
+    }
+
+    .menu-level-last {
+      color: #404040;
+      font-weight: normal;
+      font-size: 12px;
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .menu-item-logo {
+      font-size: 14px;
+      position: relative;
+      right:0px;
+      z-index: 4;
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+  .menu-item-active {
+    color: red;
+  }
+}

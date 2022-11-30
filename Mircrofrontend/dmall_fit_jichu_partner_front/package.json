@@ -1,0 +1,56 @@
+{
+    "name": "cabinx",
+    "version": "1.0.0",
+    "description": "cabinx 项目模板",
+    "scripts": {
+        "dev": "cabinx dev --dev dev",
+        "build": "cabinx build --dev dev",
+        "commit": "git-cz",
+        "lint": "npm run lint:pages && npm run lint:common",
+        "lint:pages": "eslint --ext .js --ext .vue ./pages;",
+        "lint:common": "eslint --ext .js --ext .vue ./common;",
+        "lint-fix": "npm run lint-fix:pages && npm run lint-fix:common",
+        "lint-fix:pages": "eslint ./pages --ext .js --ext .vue --fix;",
+        "lint-fix:common": "eslint ./common --ext .js --ext .vue --fix;",
+        "permission": "cd ..;sudo chmod -R 777 x_partner;cd x_partner"
+    },
+    "author": "",
+    "devDependencies": {
+        "@commitlint/cli": "^8.3.4",
+        "@commitlint/config-conventional": "^8.3.4",
+        "@typescript-eslint/eslint-plugin": "^5.13.0",
+        "@typescript-eslint/parser": "^5.13.0",
+        "commitizen": "^4.0.3",
+        "cz-customizable": "^6.2.0",
+        "eslint": "^8.10.0",
+        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-plugin-import": "^2.25.4",
+        "eslint-plugin-vue": "^8.5.0",
+        "husky": "^4.0.9",
+        "lint-staged": "^12.1.4"
+    },
+    "config": {
+        "commitizen": {
+            "path": "node_modules/cz-customizable"
+        }
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged",
+            "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+        }
+    },
+    "lint-staged": {
+        "pages/**/*.{js,vue}": [
+            "eslint --ext .js --ext .vue",
+            "git add ."
+        ],
+        "common/**/*.{js,vue}": [
+            "eslint --ext .js --ext .vue",
+            "git add ."
+        ]
+    },
+    "dependencies": {
+        "cabinx-cli": "^0.8.0-dev.76"
+    }
+}

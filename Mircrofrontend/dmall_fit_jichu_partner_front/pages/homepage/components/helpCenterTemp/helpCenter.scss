@@ -1,0 +1,103 @@
+.component-helpCenter {
+  height: 100%;
+  .x-box {
+    height: 100%;
+  }
+  .more {
+    color: #999999;
+    cursor: pointer;
+    padding: 4px 8px;
+    &:hover {
+      color: #0f62fe;
+      background: #ebf4ff;
+      border-radius: 2px;
+    }
+  }
+  .component-helpCenter-content {
+    display: flex;
+    align-items: center;
+    padding: 54px;
+    height: 100%;
+    .helpCenter-content-item {
+      display: flex;
+      align-items: center;
+      margin-right: 48px;
+      flex: 1;
+     
+      .content-item-left {
+        margin-right: 8px;
+        display: flex;
+        align-items: center;
+      }
+      .content-item-right {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        .item-right-title {
+          font-size: 14px;
+          letter-spacing: -0.084px;
+          font-weight: bold;
+          color: #333333;
+          height: 18px;
+          line-height: 18px;
+        }
+        .item-right-content {
+          color: rgba(0, 0, 0, 0.4);
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          line-height: 16px;
+          height: 31px;
+          -webkit-line-clamp: 2;
+        }
+      }
+    }
+  }
+
+  @media screen and (max-width: 1280px) {
+    .component-helpCenter-content {
+      display: flex;
+      padding: 32px;
+      height: 100%;
+      flex-direction: column;
+      overflow: hidden;
+      align-items: flex-start;
+      .helpCenter-content-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+        flex: 1;
+        flex-shrink: 0;
+       
+        .content-item-left {
+          margin-right: 8px;
+          display: flex;
+          align-items: center;
+        }
+        .content-item-right {
+          display: flex;
+          justify-content: center;
+          flex-direction: column;
+          .item-right-title {
+            font-size: 14px;
+            letter-spacing: -0.084px;
+            font-weight: bold;
+            color: #333333;
+            height: 18px;
+            line-height: 18px;
+          }
+          .item-right-content {
+            color: rgba(0, 0, 0, 0.4);
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 16px;
+            height: 31px;
+            -webkit-line-clamp: 2;
+          }
+        }
+      }
+    }
+  
+  }
+}

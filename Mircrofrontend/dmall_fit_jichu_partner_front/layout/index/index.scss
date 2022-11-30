@@ -1,0 +1,74 @@
+.cabinindex {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    
+    .top-tab{
+        margin-bottom: 2px;
+    }
+    .top-header {
+        width: 100%;
+        height: 48px;
+        position: relative;
+        z-index: 1000;
+    }
+    .bottom-content {
+        width: 100%;
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        position: relative;
+
+        .right-content {
+            flex: 1;
+            background-color: #f0f1f2;
+            transition: none !important;
+        }
+        // z-index: 1;
+        .left-menu {
+            height: 100%;
+            position: relative;
+            z-index: 1000;
+        }
+        .container-wrap {
+            height: calc(100% - 32px);
+            .tab-container {
+                height: 100%;
+                transition: none;
+                background-color:#F0F1F2;
+                .x-page {
+                    transition: none;
+                }
+
+                &__auth-wrapper {
+                    box-sizing: border-box;
+                    padding: 0 16px 60px 16px;
+                    background: #fff;
+                    border-radius: 2px;
+                    margin-bottom: 10px;
+
+                    &__box {
+                        background-image: url('//static.dmall.com/kayak-project/cabin/dist/cabin/common/img/empty.png');
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        width: 100%;
+                        height: 300px;
+                        display: -ms-flexbox;
+                        display: flex;
+                        -ms-flex-direction: column;
+                        flex-direction: column;
+                        -ms-flex-align: center;
+                        align-items: center;
+
+                        &__text {
+                            color: #999;
+                            font-size: 16px;
+                            margin-top: auto;
+                            margin-bottom: 27px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

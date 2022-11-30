@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html class="partner cabin">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="author" content="dmall" />
+    <meta name="description" content="多点，多点新鲜，Dmall，多点商城，多点新鲜，生活，服务，生鲜，配送" />
+    <meta name="keywords" content="多点，多点新鲜，O2O，Dmall，多点商城，多点新鲜，生活，服务，生鲜，配送" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>多点飞拓</title>
+    <link rel="icon" type="image/png" href="https://img.dmallcdn.com/dshop/202205/bdcb3f6e-bff6-4fa5-827a-1c0a332ff9eb" sizes="256x256"/>
+    <script type="application/javascript"
+        data-src="??kayak-lib/dist/kayak-lib/jquery2.2.3/jquery-2.2.3.js,kayak-lib/dist/kayak-lib/seajs3.0/sea-debug.js,kayak-lib/dist/kayak-lib/seajs3.0/config.js,kayak-lib/dist/kayak-lib/arttemplate3.0/template-native.js,kayak-lib/dist/kayak-lib/fastclick/fastclick.js,kayak/dist/kayak/plugin/plugin.js">
+    </script>
+    <script data-src="entry_html/dist/js/env.js"></script>
+    <style>
+        dl,ol,ul {
+            margin-top: 0;
+            padding: 0px;
+        }
+        li {
+            list-style: none;
+        }
+        /* 处理移动端页面高度问题 */
+       .cabinfull,
+       .right-content,
+       .content-container {
+           height: 100%;
+       }
+    </style>
+</head>
+
+<body>
+    <!-- 进入页面及显示loading，以免出现长时间空白界面 -->
+    <div class="body-loading show">
+        <div class="vertical-box">
+            <div class="content"><i class="loader"></i></div>
+        </div>
+        <div class="mask"></div>
+    </div>
+    <script>
+        (function () {
+            //cmd 转 amd
+            window.aDefine = function (id, deps, factory) {
+                
+                define(id, deps, function (require, exports, module) {
+                    var depOjbs = [];
+                    if (deps && deps.length > 0) {
+                        deps.forEach(function (v, k) {
+                            depOjbs.push(require(v));
+                        });
+                    }
+
+                    if (factory && typeof factory === "function") {
+                        var exp = factory.apply(this, depOjbs);
+                        if (exp && exp.default) {
+                            //如果是一个cabin页面，则转移一些变量st
+                            if (exp.default.cabinVue) {
+                                exp.default.cabinVue.render = exp.default.render;
+                                exp.default.cabinVue.staticRenderFns = exp.default.staticRenderFns;
+                                exp.default.cabinVue.__file = exp.default.__file;
+                                exp.default.cabinVue._compiled = exp.default._compiled;
+                                exp.default.cabinVue._scopeId = exp.default._scopeId;
+                            }
+                            //如果是一个cabin页面，则转移一些变量ed
+                            module.exports = exp.default;
+                        } else {
+                            module.exports = exp;
+                        }
+                    }
+                });
+            };
+            // 这里进行项目替换
+            window.kayak = window.kayak || {};
+            window.kayak.bizDomain = getBizDomain();
+            window.kayak.root = getSourceRoot();
+            window.kayak.EVT = getEvt();
+            window.kayak.urlRequest = getRequest();
+            // 添加入口loading样式
+            document.write('<link rel="stylesheet" href="' + window.kayak.root +
+                "dmall_fit_jichu_partner_front/dist/dmall_fit_jichu_partner_front/assets/styles/partner-loading.css?_=" + new Date().getTime() + '">');
+            // document.write('<link rel="stylesheet" href="http://testlocal.dmall.com/kayak-project/partner/src/partner/common/style/index-loading.css?_='+(new Date()).getTime()+'">');//test
+            document.write('<script src="' + window.kayak.root +
+                'kayak-lib/dist/kayak-lib/jsloader/jsloader.js" type="application/javascript"><\/script>');
+
+            document.write('<script src="' + window.kayak.root +
+                'dmall_fit_traffic_js_sdk/dist/dmallanlytic.js" type="application/javascript"><\/script>');
+            // 引入组件化支持的js
+            // document.write( '<script src="' +  window.kayak.EVT + "helpcentercomponent.dmall.com/1.1.0/bundle.js?_=" + new Date().getTime() + '" type="application/javascript"><\/script>');
+            // 全链路灰度逻辑
+            document.write('<script src="' +  'https://api-tenant.fit.dmall.com/app/nessau/route/projectChart.js?_=' + (new Date()).getTime() + '" type="application/javascript"><\/script>');
+
+            /**
+             * 获取当前页面的业务域名
+             * @param {string} domain 非必传参数
+             * @return {string} bizDomain 业务域名
+             * 示例:
+                (1) 'demo.dmall.com.cn' => 'dmall.com.cn'
+                (2) 'demo.dmall.com' => 'dmall.com'
+                (3) 'demo.dmall-os.cn' => 'dmall-os.cn'
+            */
+            //获取业务域名的封装方法
+            function getBizDomain( domain ) {
+                var domainList = ( domain || document.domain ).split( '.' );
+                if( domainList.length > 2 ){
+                    domainList.shift();
+                }
+                return domainList.join( '.' )
+            }
+
+            function getSourceRoot() {
+                var param = getRequest();
+                var domainReg = new RegExp("//[A-Za-z0-9]+." + 'fit.dmall.com');
+                // 调试模式走调试地址
+                if (
+                    param.debuglocation &&
+                    domainReg.test(param.debuglocation)
+                ) {
+                    return param.debuglocation
+                }
+                // 默认走环境+静态资源路径
+                return getEvt() + 'static.fit.dmall.com/kayak-project/'
+            }
+
+            function getEvt() {
+                var href = window.location.href, result = '';
+                if (href.indexOf('//test') > 0 && href.indexOf('//test.') == -1) {
+                    result = '//test';
+                } else if (href.indexOf('//mid') > 0 && href.indexOf('//mid.') == -1) {
+                    result = '//mid';
+                } else if (href.indexOf('//dev') > 0 && href.indexOf('//dev.') == -1) {
+                    result = '//dev';
+                } else if (href.indexOf('//uat') > 0 && href.indexOf('//uat.') == -1) {
+                    result = '//uat';
+                } else if (href.indexOf('//rd-') > 0 && href.indexOf('//rd-.') == -1) {
+                    result = '//rd-';
+                } else {
+                    result = '//';
+                }
+                return result;
+            }
+
+            function getRequest(type) {
+                var url, theRequest = {},
+                    i, strs;
+                var $win = window.top || window;
+                type = type || "search";
+                switch (type) {
+                    case "hash":
+                        url = $win.location.href.split("#")[1] || "";
+                        break;
+                    case "search":
+                        // 避免hash不规范情况
+                        url = $win.location.href.split("?")[1] || "";
+                        url = url.split("#")[0];
+                        break;
+                }
+                strs = url.split("&");
+                for (i = 0; i < strs.length; i++) {
+                    theRequest[strs[i].split("=")[0]] = unescape(
+                        strs[i].split("=")[1]
+                    );
+                }
+                return theRequest;
+            }
+            //在这验证登录信息
+            const useInfoUrl =`${getEvt()}api-tenant.fit.dmall.com/jichu/ryqx/sso/client/isLogin`
+
+            fetch(useInfoUrl,{
+                    credentials: 'include',}
+                   ).then(response => response.json())
+                    .then(res => {
+                        if(res && res.code === '0000' && !res.data){
+                            // 用户未登录
+                        const returnUrl = window.location.href;
+                        CabinX.go(
+                            `${EVT
+                            }partner.fit.dmall.com/login?redirectURL=${
+                                encodeURIComponent(returnUrl)
+                            }#full/dmall_fit_jichu_sso_front/ssologin`,
+                        );
+                        }
+                   })
+            
+            
+            
+        })
+        
+        ();
+    </script>
+    <script>
+        var isMedusaPro = false;
+        var MedusaProHash = "";
+        var count = 0;
+
+        // var helpCenterMapKey = {
+        //     'prd': {
+        //         appId: 'xlPkiuPd',
+        //         appSecret: 'E71BA784A2A751295B36B500D76E9E40'
+        //     },
+        //     'test': {
+        //         appId: 'vauNJAZD',
+        //         appSecret: 'F4C50C6E0F64D9E17C1B368DCDB3E252'
+        //     },
+        //     'rd-': {},
+        //     'dev': {}
+        // };
+        // 绕过浏览器自身路由bug
+        window.onload = function () {
+            // 帮助中心小组件设置appId appSecret
+            // var evt = window.kayak.EVT.replace("//", '') || 'prd';
+            // var helpCenter = helpCenterMapKey[evt];
+            // window.helpCenterSDK && window.helpCenterSDK.setBaseInfo(helpCenter.appId, helpCenter.appSecret);
+            
+          
+            setTimeout(function () {
+                debugger
+                //版本号确定更新后不走缓存
+                var version = 202210251427;
+                window.kayak.Loader.loadCss(version);
+                window.kayak.Loader.loadJs(function () {
+                    FastClick.attach(document.body);
+                    
+                    //灰度缓存
+                    var userRouteKey = getCookie('aladdin_route_key') || '';
+                    var grayData = getGrayData(); 
+
+                    //获取灰度数据
+                    function getGrayData() {
+                        //接口挂掉,走本地缓存
+                        if (typeof aladdinChart === 'undefined') {
+                            console.log('[Aladdin Chart] 项目单元、灰度配置 fetch error');
+
+                            return getProjectMapCache();
+
+                        }
+
+                        return aladdinChart
+                    }
+
+                    //读取cookie
+                    function getCookie(b) {
+                        var c = new RegExp("(^|;|\\s+)" + b + "=([^;]*)(;|$)"),
+                            a = document.cookie.match(c);
+                        if (window.navigator.userAgent.match(/dmall/i)) {
+                            //isDmallapp
+                            return !a ? "" : decodeURI(a[2]);
+                        }
+                        return !a ? "" : unescape(a[2]);
+                    };
+
+                    //设置cookie
+                    function setCookie(name, value, domain, daysToLive) {
+                        // 对 cookie 值进行编码以转义其中的分号、逗号和空格
+                        var cookie = name + "=" + encodeURIComponent(value);
+
+                        if (typeof daysToLive === "number") {
+                            /* 设置 max-age 属性 */
+                            cookie += "; max-age=" + (daysToLive * 24 * 60 * 60);
+                        }
+
+                        if(typeof domain === 'string') {
+                            cookie+=";domain="+domain;
+                        }
+                        cookie+=";path=/"
+                        document.cookie = cookie;
+                    }
+                    /** 
+                     * 检查当前hash里的文件目录是否命中灰度
+                     * 
+                     * **/
+
+                    //检查是否有灰度文件夹
+                    function checkDir(){
+                        const {list=[]} = grayData;
+                        const {hash} = window.location
+                        let target = hash && hash.split('/')[1];
+                        target = target.split('/')[0]; 
+
+                        if(list.map(i=>i.dir).includes(target)){
+                            return true
+                        }
+
+                        return false
+                    }
+
+                    //hashChange的时候去检验全链路灰度
+                    function checkGrayFlag(){
+                        
+                        initGrayCookie();
+
+                        if(checkDir()){
+                            setGrayFlag();
+                        }
+
+                    }
+
+                    /**
+                     * 生成单元、灰度资源 ProjectMap
+                     * @parma {string} path 项目路径中 hash
+                     */
+                    function generateProjectMap() {
+
+                        initGrayCookie();
+                       
+                        var kayakPrefixPath = window.kayak.EVT + 'static.fit.dmall.com/';
+                        var projectMap = {}
+                        const {list} = grayData;
+
+                        list && list.forEach(cur=>{
+                            projectMap[cur.dir] = kayakPrefixPath + cur.path;
+                        })
+
+                        //判断需不需要全链路染色
+                        if(checkDir()){
+                            setGrayFlag();
+                        }
+
+                        console.log('[Aladdin Chart] projectMap: ', grayData);
+
+                        setProjectMapCache();
+                        return projectMap;
+                    }
+
+                    //全链路灰度染色
+                    function setGrayFlag(){
+                        const {fullGrayCookie={}} = grayData;
+                        const {name,value,domain} = fullGrayCookie;
+
+                        if(domain && name &&value){
+                            const domainArr = domain.split(',');
+
+                            domainArr.forEach(domain=>{
+                                setCookie(name,value,domain,1);
+                            })
+                        }
+                    }
+
+                    //初始化全链路灰度cookie
+                    function initGrayCookie(){
+                        const {fullGrayCookie={}} = grayData;
+                        const {name,domain} = fullGrayCookie;
+
+                        if (name && domain) {
+                            const domainArr = domain.split(',');
+
+                            domainArr.forEach(domain => {
+                                setCookie(name, '', domain)
+                            })
+                        }
+
+                    }
+
+                      /**
+                        * 设置缓存 ProjectMap
+                        * @parma {string} user 用户加盐标示
+                        */
+                    function setProjectMapCache() {
+                        if(userRouteKey){
+                            let storageKey = 'aladdin_fit_chart_' + userRouteKey;
+
+                            localStorage.setItem(storageKey, JSON.stringify(grayData));
+                        }
+                    }
+
+                   /**
+                     * 获取缓存 ProjectMap
+                     * @parma {string} user 用户加盐标示
+                     */
+                    function getProjectMapCache() {
+                            if(userRouteKey){
+                                let storageKey = 'aladdin_fit_chart_' + userRouteKey;
+
+                                return JSON.parse(localStorage.getItem(storageKey)||'{}');
+                            }
+
+                            return {}
+                            
+                    }
+                    //seajs  逻辑
+                    seajs.config({
+                        EVT: window.kayak.EVT,
+                        kayak: {
+                            version: version,
+                            updateVersion: true,
+                            cellular: false,
+                            projectMap: generateProjectMap(),
+                            douCoreUse:['cabinx_app_runtime/lib/xPartnerAPI'],
+                            cache: {
+                                main: false // main不缓存
+                            },
+                            //tpl资源链接后添加自定义参数
+                            getTplUri: function (url) {
+                                // 适配灰度需求，给来客项目的tpl添加相应参数
+                                var curVisitUrl = window.location.href;
+
+                                //是否来客内路边访问
+
+                                var userId = getCookie("user_id");
+                                // venderKey =window.kayak.EVT.indexOf("dev") > -1? "dev": window.kayak.EVT.indexOf("test") > -1? "test": "prd",
+                                // venderId = getCookie(venderKey + "_dmall_vender");
+
+                                //tpl url上添加参数
+                                var modifyUrl = function (curRequestUri) {
+                                    var flag = curRequestUri && curRequestUri.split(
+                                            ".tpl?") && curRequestUri.split(".tpl?")
+                                        .length > 1 ? true : false; //是否已经带参数
+                                    var tag = flag ? "&" : "?";
+                                    var modifiedRequestUri = curRequestUri + tag +
+                                        "userId=" + userId;
+
+                                    return modifiedRequestUri;
+                                };
+
+                                if (url.indexOf(",") > -1) {
+                                    //有多个资源合并请求
+                                    var requestUriGroup = url.split(",");
+
+                                    for (var i = 0; i < requestUriGroup.length; ++i) {
+                                        requestUriGroup[i] = modifyUrl(
+                                            requestUriGroup[i]
+                                        );
+                                    }
+                                    url = requestUriGroup.join(","); //合并url
+                                } else {
+                                    //单个资源请求
+                                    url = modifyUrl(url);
+                                }
+
+                                return url;
+                            }
+                        }
+                    });
+
+                    /*********************** 404逻辑 ***********************/
+
+                    var allErrorUrlObj = []; //全部请求失败的url集合
+
+                    //页面添加404提示
+                    var appendErrTemp = function () {
+                        if ($('body div[data-id="partner404"]').length < 1) {
+                            var appendDom = $("body .J_Main").length > 0 ? $("body .J_Main") :
+                                $("body");
+                            appendDom.append(`
+                                <div data-id="partner404" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;background:#fff;">
+                                    <div style="height:200px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center">
+                                        <img src="https://img.dmallcdn.com/dshop/202108/d85c121b-7425-432d-acf1-6a744c7be2fe" width="200px"/>
+                                        <div style="width:300px;">
+                                            <div style="font-size:18px;color:#1a1a1a;line-height:1.5;font-weight:500;">404</div>
+                                            <div style="font-size:14px;color:#666666;line-height:1.5;margin-top:10px">您访问的页面不存在或链接错误，请检查所输入的链接是否正确</div>
+                                        </div>
+                                    </div>
+                                </div>`);
+                        }
+                    };
+
+                    //资源加载失败，跳404
+                    seajs.on("error", function () {
+                        console.log(arguments);
+                        //合并数组并去重 函数
+                        var uniqueArr = function (arr1, arr2) {
+                            var arr3 = arr1.concat(arr2);
+                            var arr4 = [];
+                            if (arr3.length == 1) {
+                                arr4 = arr3;
+                            }
+                            for (var i = 0, len = arr3.length; i < len; i++) {
+                                if (arr4.indexOf(arr3[i]) === -1) {
+                                    arr4.push(arr3[i]);
+                                }
+                            }
+                            return arr4;
+                        };
+
+                        if (!arguments || (arguments && arguments.length < 1)) {
+                            return;
+                        }
+
+                        var requestUri = []; //错误请求地址列表
+                        var curPath = kayak.router && kayak.router.currentPath; //当前hash
+
+                        for (var i = 0; i < arguments.length; ++i) {
+                            var errUri =
+                                arguments[i] && arguments[i].uri ?
+                                arguments[i].uri :
+                                "";
+                            var curUrls = errUri && errUri.split("??") && errUri.split(
+                                "??")[1] ? errUri.split("??")[1] : "";
+                            var curUrl = [];
+                            if (curUrls) {
+                                curUrls.indexOf("?") > -1 ? (curUrls = curUrls.split("?")[
+                                    0]) : curUrls;
+                                curUrls.indexOf(",") > -1 ? (curUrl = curUrls.split(",")) :
+                                    (curUrl = [curUrls]);
+                            }
+
+                            if (curUrl && curUrl.length > 0) {
+                                requestUri = uniqueArr(requestUri, curUrl);
+                            }
+                        }
+
+                        if (!requestUri || (requestUri && requestUri.length < 1)) {
+                            //请求失败地址不存在存在
+                            return;
+                        }
+
+                        var requestUriStr = requestUri.join(",");
+
+                        var pathArr = kayak.router.currentPath.split("/");
+                        var projectName = pathArr[1]; //项目名称
+                        var pageName = pathArr[pathArr.length - 1]; //页面名称
+
+                        pathArr.splice(0, 2);
+                        pathArr.splice(pathArr.length - 1, 1);
+
+                        var centerPath = pathArr && pathArr.length > 0 ? pathArr.join("/") :
+                            ""; //路径中间组成部分
+                        var curPageUrl = "/" + projectName + "/" + "pages/" + (centerPath ?
+                                centerPath + "/" : "") + pageName + "/" + pageName +
+                            ".js"; //当前页面js路径
+
+                        if (requestUriStr.indexOf(projectName + "/main/main.js") > -1 ||
+                            requestUriStr.indexOf(curPageUrl) > -1) {
+                            allErrorUrlObj = uniqueArr(
+                                allErrorUrlObj,
+                                requestUri
+                            ); //合并错误请求url
+                            appendErrTemp(); //插入404提示
+                        }
+                    });
+
+                    /*********************** 404逻辑 end ***********************/
+
+                    //获取cookie
+                    function getCookie(name) {
+                        var arr, reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+                        if ((arr = document.cookie.match(reg)))
+                            return unescape(arr[2]);
+                        else
+                            return null;
+                    }
+
+                    var sizeType = getCookie("partner_style_size");
+                    var cssSuffix = ""; //css资源后缀
+
+                    if (!sizeType) {
+                        cssSuffix = "";
+                        window.cabinSize = "normal";
+                        window.cabinxSize = "small";
+                    } else {
+                        cssSuffix = sizeType == "normal" ? "" : "-" + sizeType;
+                        window.cabinSize = sizeType;
+                        window.cabinxSize = sizeType;
+                    }
+
+                    
+                    seajs.use(
+                        [
+                            'kayak/core/kayak',
+                            'cabincore/lib/vue/vue',
+                            'cabinx/core/0.6.0/core',
+                            'dmall_fit_jichu_partner_front/layout/widgets/tab/tabController',
+                            'dmall_fit_jichu_partner_front/layout/widgets/partnerAPI/partnerAPI',
+                            'cabinx/util/config.js',
+                            'dmall_fit_jichu_partner_front/layout/widgets/header/MessMonitor'
+                        ],
+                        function (kayak, vue, cabinx, TabController, PartnerAPI, cabinxConfig,msIns) {
+
+                            // 获取 TabController 单例
+                            window.xPartnerTabController = TabController.getInstance();
+                            // 初始化 壳框架相关  API 给相关方调用
+                            window.xPartnerAPI = PartnerAPI.getInstance(xPartnerTabController);
+                            window.Biz = window.xPartnerAPI;
+                            //解决业务页面改标题影响到浏览器页签
+                            Object.defineProperty(document,'title',{
+                                set(value){
+                                    console.info(`${window.location.hash}尝试修改标题失败，修改值为${value}`)
+                                },
+                                get(){
+                                    return '多点飞拓'
+                                } 
+                            })
+
+                            // CabinX 方法拓展仅在 PC 端使用
+                            if (cabinx.device.isPC) {
+                                // 实现 CabinX 相关 API
+                                cabinx.extends({
+                                    // 路由相关
+                                    router: {
+                                        // close tab
+                                        close: function(url) { 
+                                            console.log('🔧 [cabinx.extends.close]', url);
+
+                                            if(url === undefined){ //关闭当前
+                                                return window.xPartnerAPI.closeActivatedTab();
+                                            }
+                                            // 关闭对应的 url tab页面
+                                            window.xPartnerAPI.closeTab(url);
+                                        },
+                                        refreshTab: function(url) { 
+                                            console.log('🔧 [cabinx.extends.refreshTab]');
+                                            // 刷新 tab页面
+                                            window.xPartnerAPI.refreshTab();
+                                        },
+                                        replace: function(url, options){
+                                            window.xPartnerTabController.replaceTab(url,options)
+                                        }
+                                    }
+                                });
+                            }
+
+                            // 全局分隔符配置，用于 CabinxConfig
+                            const separatorsSettings = [
+                                [ //分隔符
+                                    '\s', // 匹配所有空白符,
+                                    ',','，', // 英文逗号，中文半角／全角逗号
+                                    ';','；', // 英文分号，中文半角／全角分号
+                                    '。', // 英文句号，中文全角句号
+                                    '、', // 中文全角顿号(西方语言不存在顿号)
+                                    '|','/', // 英文分隔符号
+                                ], 
+                                ',' // 默认连接符：',' (英文逗号)
+                            ];
+
+                            cabinxConfig.setConfig({
+                                // 初始化渠道版样式
+                                ui: {
+                                    themeConfig: {
+                                        checkbox: {
+                                            checkboxClassName: 'qudao',
+                                        },
+                                        button: {
+                                            secondary: 'secondary-qudao'
+                                        },
+                                        tabs: {
+                                            headerBackground: 'qudao'
+                                        },
+                                        form: {
+                                            formSearchBackground: 'qudao',
+                                            choiceTriggerBackground: 'qudao',
+                                            notStayInitLayout:true,
+                                        },
+                                        module:{
+                                            moduleBackgroundColorClass:'qudao'
+                                        },
+                                        tag: {
+                                            statusStyle: 'noDot',
+                                        }
+                                    },
+                                    layoutConfig: {
+                                        pageLayoutResizeable: true,
+                                        layoutPadding: 8,
+                                        tabsPopUpActions: false,
+                                        actionsTurned: true,
+                                    },
+                                },
+                                // 权限校验
+                                auth: {
+                                    authPrivilege(authCode) {
+                                        return window.Biz.authPrivilegeSync(authCode);
+                                    }
+                                },
+                                datepicker: {
+                                    daterange: {
+                                        shortcuts: [
+                                            {
+                                                text: '今天',
+                                                onClick(picker) {
+                                                    picker.$emit('pick', [new Date(), new Date()]);
+                                                },
+                                            },
+                                            {
+                                                text: '昨天',
+                                                onClick(picker) {
+                                                    const time = Date.now() - 1000 * 3600 * 24;
+                                                    picker.$emit('pick', [new Date(time), new Date(time)]);
+                                                },
+                                            },
+                                            {
+                                                text: '过去7天',
+                                                onClick(picker) {
+                                                    picker.$emit('pick', [
+                                                        new Date(Date.now() - 1000 * 3600 * 24 * 7),
+                                                        new Date(),
+                                                    ]);
+                                                },
+                                            },
+                                            {
+                                                text: '过去15天',
+                                                onClick(picker) {
+                                                    picker.$emit('pick', [
+                                                        new Date(Date.now() - 1000 * 3600 * 24 * 15),
+                                                        new Date(),
+                                                    ]);
+                                                },
+                                            },
+                                            {
+                                                text: '过去30天',
+                                                onClick(picker) {
+                                                    picker.$emit('pick', [
+                                                        new Date(Date.now() - 1000 * 3600 * 24 * 30),
+                                                        new Date(),
+                                                    ]);
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                input: {
+                                    text: {
+                                        separators: separatorsSettings,
+                                    },
+                                    scan: {
+                                        separators: separatorsSettings,
+                                    },
+                                },
+                                select: {
+                                    separators: separatorsSettings,
+                                },
+                                cascader: {
+                                    separators: separatorsSettings,
+                                },
+                            });
+                    
+                            // 提前初始化原有 cabincore 中 moment，因项目会隐式引用
+                            Vue.prototype.moment = window.moment;
+
+                            //初始化埋点projectName
+                            window.DmallTracker && window.DmallTracker.instance('partner_pc');
+
+                            //封装一个点击事件埋点
+                            window.xPartner_clickTrack = (element_id, element_name) => {
+                                window.DmallTracker.track('element_click', {
+                                    page_url: window.location.href,
+                                    element_id,
+                                    element_name,
+                                    module:{
+                                        p:'-1',
+                                        r:'-1',
+                                        k:'-1',
+                                        i:'-1',
+                                        n:'飞拓商户平台-pc'
+                                    }
+                                })
+                            }
+
+                            window.Biz.getSystemConfig().then(function(result) {
+                                console.groupCollapsed(`⚙ [Biz] getSystemConfig`);
+                                console.info('%c result  ', 'color: #2196F3;', result);
+                                console.groupEnd();
+                                
+                                cabinxConfig.setConfig({
+                                    // 格式化
+                                    formatter: Object.assign({}, result),
+                                });
+                            })
+                            
+
+                            // 隐藏loading
+                            let $bodyLoading = $(".body-loading");
+                            $(".body-loading").removeClass("show");
+                            setTimeout(function () {
+                                $bodyLoading.remove();
+                            }, 800);
+
+                            var router = cabinx.router;
+
+                            router.on("preJump", function (e) {
+                                console.groupCollapsed(`⏺ [Kayak Router] preJump @ ${new Date().toLocaleTimeString()}.${new Date().getMilliseconds()}`);
+                                console.info('%c data  ', 'color: #2196F3;', e);
+                                console.groupEnd();
+
+                                if (e.pathData && e.pathData.dmalllink == "" && e
+                                    .pathData.web == "") {
+                                    kayak.router.replace(
+                                    "#index/dmall_fit_jichu_partner_front/homepage"); //默认去的页面
+                                    return;
+                                }
+
+                                // 业务系统尝试打开的无权限页名单
+                                const notPermissionPath = [
+                                    'index/atlas_h5/notPermission',
+                                    'index/dmall_live_cabin/nopermissions',
+                                    '#full/partner/nopermissions',
+                                    '#index/partner/nopermissions',
+                                    '#full/esc/nopermissions',
+                                    '#index/esc/nopermissions',
+                                ].join('');
+
+                                // 无权限打开 新tab 拦截
+                                // dmalllink:-1 web: -1 为移动端 
+                                if (e.pathData && e.pathData.dmalllink !== -1 && notPermissionPath.indexOf(e.pathData.dmalllink.split('#')[1]) !== -1) {
+                                    const currentPath = window.kayak.router.currentPath;
+
+                                    console.info('[PartnerTab]: inner project trying to open notPermission, path: #' + currentPath);
+                                    window.xPartnerTabController.setTabNoPermission('#'+ currentPath);
+                                    return false;
+                                }
+                            });
+
+                            router.on("parseMain", function (pathObj) {
+                                var projectName = pathObj.path.split("/")[1];
+                                pathObj.mainPath = projectName + "/main/main";
+                            });
+
+                            function getLastSubPath(path) {
+                                var last = path[path.length - 1];
+
+                                return last.split(':').shift().concat('/', last);
+                            }
+
+                            // 是否是需要无框架展示页面
+                            var isFullPage = function(path) {
+                                return (path || '').indexOf('full/') !== -1
+                            }
+
+                            //路由解析
+                            router.on("parseActions", function (p) {
+                                console.groupCollapsed(`⏩ [Kayak Router] parseActions @ ${new Date().toLocaleTimeString()}.${new Date().getMilliseconds()}`);
+                                console.info('%c path      ', 'color: #2196F3;', p.path);
+                                console.info('%c fullPath  ', 'color: #2196F3;', p.fullPath);
+                                console.info('%c pathData  ', 'color: #2196F3;', p);
+                                console.groupEnd();
+
+                                // 如果已经存在于 打开 tab 列表 && 挂载完成，执行 tab 切换不加载
+                                if (p && p.fullPath && window.xPartnerTabController && !isFullPage(p.fullPath)) {
+                                    var tab = window.xPartnerTabController.getTab('#' + p.fullPath);
+                                    // 存在 tab 列表
+                                    if (tab && tab.pathData) {
+                                        var isMountComplete = tab.pathData.actionOptions ? tab.pathData.actionOptions.isMountComplete : false;
+                                        // 挂载完成
+                                        if (isMountComplete) {
+                                            window.xPartnerTabController.pureActiveTab('#' + p.fullPath)
+                                            return false;
+                                        }
+                                    }
+                                }
+
+
+                                /*********************** 404逻辑 ***********************/
+                                //移除404提示
+                                if ($('div[data-id="partner404"]').length) {
+                                    $('div[data-id="partner404"]').remove();
+                                }
+                                /*********************** 404逻辑 end ***********************/
+
+                                var pathLen = (p.fullPath + "").split("/").length,
+                                    path = (p.path + "").split("/");
+                                if (path.length == 1) {
+                                    p.actionPath = "dmall_fit_jichu_partner_front/layout/" + path[0] + "/" +
+                                        path[0];
+                                }
+                                if (pathLen < 4) {
+                                    if (path.length == 3) {
+                                        p.actionPath = path[1] + "/pages/" + getLastSubPath(path);
+
+                                        /*********************** 404逻辑 ***********************/
+                                        var allErrorUrl = allErrorUrlObj.join(",");
+                                        if (allErrorUrl.indexOf(p.actionPath + ".js") >
+                                            -1) {
+                                            appendErrTemp(); //插入404提示
+                                        }
+                                        /*********************** 404逻辑 end ***********************/
+                                    }
+                                } else {
+                                    if (path.length == pathLen) {
+                                        var centerPath = "";
+                                        for (var i = 2; i < pathLen - 1; ++i) {
+                                            centerPath += path[i] + "/";
+                                        }
+
+                                        p.actionPath =
+                                            path[1] +
+                                            '/pages/' +
+                                            centerPath +
+                                            getLastSubPath(path)
+
+                                        /*********************** 404逻辑 ***********************/
+                                        var allErrorUrl = allErrorUrlObj.join(",");
+                                        if (allErrorUrl.indexOf(p.actionPath + ".js") >
+                                            -1) {
+                                            appendErrTemp(); //插入404提示
+                                        }
+                                        /*********************** 404逻辑 end ***********************/
+                                    }
+                                }
+
+                                // 非 #full/xxxx/xxx 时 进入 tab 逻辑
+                                if (!isFullPage(p.fullPath)) {
+                                    // actionOptions 非直接赋值为对象，因 xPartnerTabController 需设置事件 actionOptions.onBeforeTitleChange
+                                    if (typeof p.actionOptions === 'undefined' || p.actionOptions === null) {
+                                        p.actionOptions = {};
+                                    }
+                                    // 挂载 action 对应的目标 container
+                                    p.actionOptions.container = window.xPartnerTabController.getContainer(p);
+                                    // 初始化 挂载 完成状态
+                                    p.actionOptions.isMountComplete = false;
+                                }
+
+                            });
+
+                            router.on('loadComplete', function(p) {
+                                const actions = p.actions;
+                                const currentAction = actions[actions.length - 1];
+
+                                if (actions.length === 0 || isFullPage(currentAction.fullPath)) {
+                                    return;
+                                }
+
+                                console.groupCollapsed(`⏩ [Kayak Router] ResourceLoadComplete : ${currentAction.fullPath}`);
+                                console.info('%c actions  ', 'color: #2196F3;', p);
+                                console.info('%c router.currentPath  ', 'color: #2196F3;', router.currentPath);
+                                console.info('%c currentAction.fullPath  ', 'color: #2196F3;', currentAction.fullPath);
+                                console.groupEnd();
+
+                                // 挂载执行时 fullPath 和 currentPath 不同时会停止，保持 isMountComplete 为 false
+                                if (currentAction.fullPath !== router.currentPath) {
+                                    console.groupCollapsed(`😈 [Kayak Router] MountNotComplete : ${currentAction.fullPath}`);
+                                    console.info('%c 页面挂载未完成      ', 'color: #2196F3;', );
+                                    console.info('%c router.currentPath  ', 'color: #2196F3;', router.currentPath);
+                                    console.info('%c currentAction.fullPath  ', 'color: #2196F3;', currentAction.fullPath);
+                                    console.groupEnd();
+                                    return;
+                                }
+
+                                // 挂载成功则修改 isMountComplete
+                                if (currentAction.actionOptions) {
+                                    currentAction.actionOptions.isMountComplete = true;
+                                    console.info(`✅ [Kayak Router] mountComplete : ${currentAction.fullPath}`);
+                                }
+                            });
+
+                            router.on('preEachExit', function(p) {
+                                return isFullPage(p.action && p.action.fullPath);
+                            });
+
+                            router.start({
+                                multiInstanceAsDiffParam: true,
+                            });
+                        }
+                    );
+                    
+
+                    // 延后 Cabin Core 相关依赖加载，仅在 main.js 入口是非 CabinX 时执行
+                    seajs.on('define', function (data) {
+                        // 判断是页面且不是 CabinX 项目，则需要提前加载 Cabin 相关依赖
+                        // 使用项目 main.js 中是否包含 #requireTarget# 来进行 CabinX 特性检测
+                        if (
+                            data && data.id && data.id.split('/') &&
+                            data.id.indexOf('/main/main') > 0 &&
+                            data.deps && data.factory.toString().indexOf('#requireTarget#') < 0
+                        ) {
+                            console.groupCollapsed(`🔧 [Kayak deps analysis] @ ${new Date().toLocaleTimeString()}.${new Date().getMilliseconds()}`);
+                            console.info('%c define id  ', 'color: #2196F3;', data.id);
+                            console.info('%c define deps', 'color: #2196F3;', data.deps);
+                            console.info('%c define data', 'color: #4CAF50;', data);
+                            console.info('%c define factory', 'color: #4CAF50;', data.factory.toString());
+                            console.groupEnd();
+
+                            // 用户可能会提前设置 Cabin，如 pageConfig 等
+                            if (window.cabin && window.cabin.Page) {
+                                console.groupCollapsed(`🔧 [Kayak deps analysis] cabin exist @ ${new Date().toLocaleTimeString()}.${new Date().getMilliseconds()}`);
+                                console.info('%c define data', 'color: #4CAF50;', data);
+                                console.groupEnd();
+                                return;
+                            }
+                            var cabinFiles = [
+                                'cabincore/core/cabin',
+                                'cabincore/style/base.css',
+                                'cabin/theme/partner/partnerup' + cssSuffix + '.css',
+                                'cabinpro/theme/partner/partner' + cssSuffix + '.css'
+                            ];
+
+                            // 添加 Cabin 相关依赖
+                            data.deps = cabinFiles.concat(data.deps);
+
+                            var factoryFn = data.factory;
+                            data.factory = function (require, exports, module) {
+                                // 在页面逻辑之前提前执行 Cabin
+                                require('cabincore/core/cabin');
+                                return factoryFn(require, exports, module);
+                            };
+
+                            console.groupCollapsed(`🔧 [Kayak deps analysis] deps do refactor @ ${new Date().toLocaleTimeString()}.${new Date().getMilliseconds()}`);
+                            console.info('%c define id  ', 'color: #2196F3;', data.id);
+                            console.info('%c define deps  ', 'color: #2196F3;', data.deps);
+                            console.info('%c new define data', 'color: #4CAF50;', data);
+                            console.groupEnd();
+                        }
+                    });
+
+                    function initSeajsEventInDiffParamMode(seajs) {
+                        function getUriInfo() {
+                            var hash = /^#(?:full|index)\/(\S+)\:(\S+)$/.exec(
+                                window.location.hash
+                            );
+
+                            if (!hash) {
+                                return null;
+                            }
+
+                            var subPaths = hash[1].split('/');
+
+                            subPaths = subPaths
+                                .slice(0, 1)
+                                .concat(
+                                    'pages',
+                                    subPaths.slice(1),
+                                    subPaths[subPaths.length - 1]
+                                );
+                            return { path: subPaths.join('/'), args: hash[2] };
+                        }
+
+                        seajs.on('define', function (eventArgs) {
+                            var uriInfo = getUriInfo();
+
+                            if (!uriInfo || uriInfo.path !== eventArgs.id)  {
+                                return;
+                            }
+
+                            var args = ':'.concat(uriInfo.args);
+
+                            eventArgs.id += args;
+                            eventArgs.uri = eventArgs.uri.replace('.js', args + '.js');
+                        });
+
+                        seajs.on('fetch', function (eventArgs) {
+                            var requestUri = eventArgs.requestUri;
+                            var uriInfo = getUriInfo();
+
+                            if (!uriInfo) {
+                                return;
+                            }
+
+                            var path = uriInfo.path;
+                            var args = uriInfo.args;
+
+                            if (requestUri.indexOf(path.concat(':', args, '.js')) === -1) {
+                                return;
+                            }
+
+                            args = ':'.concat(args);
+                            eventArgs.requestUri = eventArgs.requestUri.replace(args + '.js', '.js').concat('&', args);
+                        });
+                    }
+                    // Seajs 支持参数类型支持
+                    initSeajsEventInDiffParamMode(seajs);
+
+                    window.addEventListener('hashchange', () => {
+                        //全链路灰度逻辑
+                        checkGrayFlag();
+                    })
+                }, version);
+            }, 1);
+        };
+    </script>
+</body>
+
+</html>

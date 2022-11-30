@@ -1,0 +1,6 @@
+<page title="设置" >
+    <main>
+        <setting-comp ref="setting" x="setting">
+    </main>
+</page>
+

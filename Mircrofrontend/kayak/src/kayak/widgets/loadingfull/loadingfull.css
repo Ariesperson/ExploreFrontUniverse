@@ -1,0 +1,138 @@
+.loadingfull-mod {
+    position: fixed;
+    z-index: 1001;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+    -webkit-transition: visibility 0.2s;
+    transition: visibility .2s;
+}
+.loadingfull-mod .vertical-box {
+    position: absolute;
+    z-index: 1003;
+    top: 50%;
+    width: 100%;
+    height: 66px;
+    margin-top: -33px;
+    /*
+    -webkit-transition: -webkit-transform 0.6s ease;
+    transition: transform 0.6s ease;
+    -webkit-transform: scale(0.8);
+    transform: scale(0.8);
+*/
+    text-align: center;
+}
+.loadingfull-mod .content {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    margin-right: auto;
+    margin-left: auto;
+    padding: 0;
+    text-align: center;
+    color: #c8cccd;
+    /* border-radius: 50%; */
+    /* background-color: rgba(255, 255, 255, 0.8); */
+    font-size: 12px;
+    line-height: 70px;
+    overflow: hidden;
+}
+.loadingfull-mod .content .loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.loadingfull-mod .content .loader {
+    z-index: 1004;
+    width: 70px;
+    height: 70px;
+    /*background: url(//img.dmallcdn.com/common/2add440a-12a9-40c1-b9a3-bad9dea816db) 0 0 no-repeat;*/
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: auto 70px;
+    -webkit-animation: loading 900ms steps(25) infinite;
+    animation: loading 900ms steps(25) infinite;
+}
+.loadingfull-mod .content .text{
+  font-size: 10px;
+  text-align: center;
+  display: none;
+}
+.loadingfull-mod .app-loader .content .loader {
+    /*background: url(kayak/src/kayak/widgets/loadingfull/car.png) 0 0 no-repeat;*/
+    background-size: auto 45px;
+    -webkit-animation: apploading 4200ms steps(44) infinite;
+    animation: apploading 4200ms steps(44) infinite;
+    width: 45px;
+    height: 45px;
+    top: 1px;
+    left: 1px;
+}
+.loadingfull-mod .app-loader .text{
+  display: block;
+}
+.loadingfull-mod .vertical-box.app-loader {
+    position: absolute;
+    z-index: 1003;
+    top: 50%;
+    width: 100%;
+    height: 48px;
+    margin-top: -69px;
+    text-align: center;
+}
+.loadingfull-mod .app-loader .content {
+    /* background: url(kayak/src/kayak/widgets/loadingfull/app-loading-bg.png) 0 0 no-repeat; */
+    width: 47px;
+    height: 47px;
+    /* background-size: 100%; */
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0px 5px 0px rgba(0, 0, 0, 0.2);
+    line-height: 47px;
+    padding: 0;
+}
+.loadingfull-mod .mask {
+    position: absolute;
+    z-index: 1002;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    -webkit-transition: background .3s;
+    transition: background .3s;
+    background-color: rgba(0, 0, 0, 0);
+}
+.loadingfull-mod.show {
+    visibility: visible;
+}
+.loadingfull-mod.show .vertical-box {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+}
+.loadingfull-mod.show .mask {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+@-webkit-keyframes loading {
+    100% {
+        background-position: -1750px 0;
+    }
+}
+@keyframes loading {
+    100% {
+        background-position: -1750px 0;
+    }
+}
+@-webkit-keyframes apploading {
+    100% {
+        /*        background-position: -2816px 0;*/
+        background-position: -1980px 0;
+    }
+}
+@keyframes apploading {
+    100% {
+        /*        background-position: -2816px 0;*/
+        background-position: -1980px 0;
+    }
+}

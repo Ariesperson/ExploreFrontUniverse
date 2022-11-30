@@ -1,0 +1,435 @@
+.partner-tab {
+  width: 100%;
+  height: 32px;
+  padding-top: 2px;
+  color: #555555;
+  position: relative;
+  z-index: 900;
+  background-color: #e0e4eb;
+
+  .tab-index-content {
+    width: 48px;
+    height: 34px;
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    &__item {
+      width: 48px;
+      height: 34px;
+      transition: all 0.2s ease-in;
+      background-color: #e0e4eb;
+      cursor: pointer;
+
+      &__icon {
+        position: relative;
+        width: 48px;
+        text-align: center;
+        line-height: 32px;
+        font-size: 16px;
+        &__div {
+          position: absolute;
+          width: 1px;
+          height: 16px;
+          right: 0px;
+          top: 8px;
+          background: #c2c2c2;
+        }
+      }
+
+      &:hover {
+        background-color: #ebebeb;
+
+        .tab-fix-index__item__icon__div {
+          display: none;
+        }
+      }
+
+      &--current {
+        color: #333333;
+        background-color: #ffffff !important;
+        position: relative;
+        .tab-fix-index__item__icon__div {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .tab-content-wrap {
+    // overflow-x: hidden;
+    box-sizing: border-box;
+    padding-left: 48px;
+
+    &--overflow {
+      padding-right: 48px;
+      .tab-content {
+        justify-content: flex-end;
+      }
+    }
+  }
+
+  .tab-content {
+    display: flex;
+    height: 32px;
+    width: 100%;
+    margin-bottom: 0;
+    background: #e0e4eb;
+    .tab-item {
+      flex: 1;
+      border-radius: 4px 4px 0px 0px;
+      position: relative;
+      height: 32px;
+      line-height: 32px;
+      max-width: 182px;
+      min-width: 120px;
+      background-color: transparent;
+      // margin-right: 1px;
+      cursor: pointer;
+      text-align: left;
+      // transition: all 0.2s ease-in;
+
+     
+      .tab-item-divider {
+        width: 1px;
+        background-color: #edeff3;
+        height: 16px;
+        position: absolute;
+        left: -1px;
+        top: 8px;
+      }
+
+      .tab-item-name {
+        padding-left: 8px;
+        display: block;
+        display: flex;
+
+        &__text {
+          flex: 1;
+          line-height: 32px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        &__block {
+          width: 42px;
+          height: 32px;
+        }
+      }
+
+      .tab-item-action {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 48px;
+        height: 32px;
+      }
+
+      .tab-action-refresh,
+      .tab-action-close {
+        display: block;
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        text-align: center;
+        transition: background-color 0.1s ease-in, transform 0.2s ease-in-out,
+          opacity 0.2s ease-in-out;
+        color: #666666;
+
+        &:hover {
+          background-color: #d6d6d6;
+          color: #333333;
+          border-radius: 1px;
+        }
+      }
+
+      .tab-action-refresh {
+        visibility: hidden;
+        line-height: 16px;
+        top: 7px;
+        right: 25px;
+        font-size: 10px;
+        opacity: 0;
+        display: flex;
+        align-items: center;
+        justify-content:center;
+        // transform: translateY(15px);
+      }
+
+      .tab-action-close {
+        line-height: 16px;
+        top: 7px;
+        right: 7px;
+        font-size: 16px;
+      }
+
+      .tab-action-div {
+        position: absolute;
+        width: 1px;
+        height: 16px;
+        right: 0px;
+        top: 8px;
+        background: #c2c2c2;
+      }
+
+      &--index {
+        position: absolute;
+        left: 0;
+        top: 0;
+        max-width: 48px;
+        min-width: 48px;
+        flex: none;
+        height: 32px;
+        padding: 0;
+
+        &__icon {
+          width: 48px;
+          text-align: center;
+          line-height: 32px;
+          font-size: 16px;
+          &__div {
+            position: absolute;
+            width: 1px;
+            height: 16px;
+            right: 0px;
+            top: 8px;
+            background: #c2c2c2;
+          }
+        }
+      }
+
+      &:hover {
+        background-color: #eff2f5;
+
+        .tab-action-div,
+        .tab-item--index__icon__div {
+          display: none;
+        }
+      }
+
+      &:hover::before {
+        position: absolute;
+        bottom: 0;
+        content: "";
+        width: 20px;
+        height: 20px;
+        border-radius: 100%;
+        box-shadow: 0 0 0 40px #eff2f5;; /*使用box-shadow不影响尺寸*/
+        left: -20px;
+        // transition: 0.2s;
+        clip-path: inset(50% -10px 0 50%);
+        
+      }
+
+      &:hover::after {
+        position: absolute;
+        bottom: 0;
+        content: "";
+        width: 20px;
+        height: 20px;
+        border-radius: 100%;
+        // transition: 0.2s;
+        box-shadow: 0 0 0 40px #eff2f5; /*使用box-shadow不影响尺寸*/
+        right: -20px;
+        clip-path: inset(50% 50% 0 -10px);
+      }
+
+      &--current {
+        color: #333333;
+        background-color: #ffffff !important;
+        
+        .tab-action-div,
+        .tab-item--index__icon__div {
+          display: none;
+        }
+
+        .tab-action-refresh {
+          visibility: visible;
+          opacity: 1;
+          // transform: translateY(0px);
+        }
+      }
+      &--current::before {
+        position: absolute;
+        bottom: 0;
+        content: "";
+        width: 20px;
+        height: 20px;
+        border-radius: 100%;
+        box-shadow: 0 0 0 40px #FFFFFF !important; /*使用box-shadow不影响尺寸*/
+        left: -20px;
+        clip-path: inset(50% -10px 0 50%);
+      }
+
+      &--current::after {
+        position: absolute;
+        bottom: 0;
+        content: "";
+        width: 20px;
+        height: 20px;
+        border-radius: 100%;
+        box-shadow: 0 0 0 40px #FFFFFF !important; /*使用box-shadow不影响尺寸*/
+        right: -20px;
+        clip-path: inset(50% 50% 0 -10px);
+        z-index: 10;
+      }
+    }
+  }
+
+  .tab-overflow {
+    width: 48px;
+    height: 32px;
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    .tab-overflow-button {
+      width: 48px;
+      height: 32px;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s ease-in;
+
+      .x-icon-directive-rightd-arrow {
+        display: block;
+        width: 100%;
+        height: 100%;
+        color: #666666;
+        text-align: center;
+        line-height: 32px;
+        font-size: 16px;
+        transition: all 0.2s ease-in;
+      }
+
+      &:hover {
+        background: #ebebeb;
+      }
+    }
+
+    .tab-overflow-content {
+      position: absolute;
+      // display: none;
+      visibility: hidden;
+      right: 0;
+      top: 32px;
+      width: 200px;
+      z-index: 900;
+      transition: all 0.14s ease-in;
+      opacity: 0;
+
+      background: #ffffff;
+      box-shadow: 0px 0px 1px rgba(10, 22, 70, 0.06),
+        0px 6px 6px rgba(10, 22, 70, 0.1);
+      border-radius: 2px;
+
+      overflow-y: overlay;
+      max-height: 500px;
+
+      &::-webkit-scrollbar {
+        width: 4px !important;
+        height: 4px !important;
+        background: transparent !important;
+      }
+      &::-webkit-scrollbar-thumb {
+        background-color: transparent !important;
+      }
+      &:hover::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.1) !important;
+      }
+
+      .tab-overflow-list {
+        padding: 8px;
+        margin-bottom: 0;
+
+        .tab-overflow-item {
+          display: flex;
+          padding: 4px 8px;
+          height: 24px;
+          border-radius: 2px;
+          transition: all 0.14s ease-in;
+
+          .tab-overflow-item-name {
+            flex: 1;
+            line-height: 16px;
+            height: 16px;
+            overflow: hidden;
+            cursor: pointer;
+          }
+
+          .tab-overflow-item-close {
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.1s ease-in;
+            opacity: 0;
+            visibility: hidden;
+
+            &:hover {
+              background-color: #d6d6d6;
+            }
+          }
+
+          &--current {
+            background-color: #ebf4ff;
+            .tab-overflow-item-name {
+              color: rgba(15, 98, 254, 1);
+            }
+            .tab-overflow-item-close {
+              visibility: visible;
+              opacity: 1;
+            }
+          }
+
+          &:hover {
+            background: #f5f5f5;
+
+            .tab-overflow-item-close {
+              visibility: visible;
+              opacity: 1;
+            }
+          }
+        }
+      }
+    }
+
+    &--actived {
+      .tab-overflow-button {
+        background: #ffffff;
+        .x-icon-directive-rightd-arrow {
+          transform: rotate(90deg);
+        }
+      }
+      .tab-overflow-content {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+  }
+  .menu-functions {
+    position: fixed;
+    background: #ffffff;
+    padding: 4px;
+    box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0px 4px 6px -2px rgba(0, 0, 0, 0.05), 0px 0px 0px 1px rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
+    color: #404040;
+    min-width: 90px;
+    box-sizing: border-box;
+
+    .menu-functions-item {
+      padding: 8px 4px;
+      display: flex;
+      align-items: center;
+      height: 24px;
+      &:hover {
+        cursor: pointer;
+        background: #f5f5f5;
+        border-radius: 2px;
+      }
+    }
+  }
+}

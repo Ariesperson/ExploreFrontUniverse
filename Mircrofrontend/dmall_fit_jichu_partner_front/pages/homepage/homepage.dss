@@ -1,0 +1,3 @@
+.sa-box__main.is-box-scroll{
+    overflow:overlay !important;
+}

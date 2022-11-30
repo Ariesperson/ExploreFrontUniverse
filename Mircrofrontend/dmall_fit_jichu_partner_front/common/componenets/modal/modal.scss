@@ -1,0 +1,73 @@
+.fit-modal-cover{
+  width:100vw;
+  height:100vh;
+  background-color: rgba(0,0,0,.5);
+  bottom: 0;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 10000;
+}
+.fit-partner-modal {
+  width: 400px;
+  height: 116px;
+  padding: 10px 16px 16px;
+  position: fixed;
+  background-color: #fff;
+  border: 1px solid #fff;
+  box-shadow: 0 35px 35px -5px rgb(0 0 0 / 10%),
+    0 20px 20px -8px rgb(0 0 0 / 5%), 0 0 0 1px rgb(0 0 0 / 5%);
+  top: 50%;
+  left: 50%;
+  overflow: hidden;
+  z-index: 10001;
+  transform: translate(-50%, -50%);
+  
+  .partner-modal-title{
+    display: flex;
+    align-items: center;
+    justify-content:space-between;
+    .modal-title-text{
+        font-weight: bold;
+        font-size:14px;
+    }
+    .modal-title-icon{
+        font-size:18px;
+        cursor: pointer;
+    }
+  }
+  .partner-modal-content{
+    margin-top: 8px;
+  }
+  .partner-modal-btns {
+    display: flex;
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    .modal-btn {
+      width: 42px;
+      height: 24px;
+      padding: 8px;
+      display:flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+      border: 1px solid transparent;
+
+      &:hover{
+        cursor: pointer;
+      }
+    }
+    .modal-btns-confirm {
+      margin-left: 8px;
+      background: #0f62fe;
+      color: #fff;
+    }
+    .modal-btns-cancel {
+      background: #fff;
+      border-color: #ebebeb;
+      color: #666;
+    }
+  }
+}
