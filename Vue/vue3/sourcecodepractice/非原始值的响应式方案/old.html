@@ -6,18 +6,8 @@
     let activeEffect
     //副作用函数栈 是为了解决嵌套副作用函数的时候后面的会覆盖前面的的问题
     const effectStack = []
-    const data = { foo: 1, bar: 2 }
-    const obj = new Proxy(data, {
-        get(target, key) {
-            track(target, key)
-            return target[key]
-        },
-        set(target, key, newVal) {
-            target[key] = newVal
-            trigger(target, key)
-        }
-
-    })
+    //响应式全局的symbol key 这个专门用于最终和触发for in响应式的
+    const ITERATE_KEY = Symbol()
     //get时的拦截响应式追踪函数 根据target获取到对应的Map 然后再根据key获取到对应的Set 如果都是不存在初始化  
     //之后将当前的副作用函数存储到deps里同时在当前的副作用函数的deps内将当前的副作用函数存储进去，它是为了收集当前副作用函数的依赖。
     function track(target, key) {
@@ -35,8 +25,7 @@
     }
     //trigger是响应式的触发器 即根据target和key从bucket内拿到对应的储存的副作用函数的set并执行它，为了解决执行完副作用函数之后依赖又被收集而导致的无限执行的问题，我们创建
     //我们创建了一个effectstoRun的set集合来存储并执行副作用函数，这样在一次trigger内只会遍历一次，并不会无限遍历下去因为源数据set集合并不会因为副作用函数的执行而收集新的依赖。
-    function trigger(target, key) {
-        debugger
+    function trigger(target, key,type) {
         let depsMap = bucket.get(target)
         if (!depsMap) {
             return
@@ -48,6 +37,19 @@
                 effectsToRun.add(effectFn)
             }
         });
+        // for in 操作需要执行的副作用函数
+        const iterateEffects = depsMap.get(ITERATE_KEY)
+        //如果是新增属性的操作
+        if (type === 'ADD') {
+            //只有当操作为ADD的时候，才触发与ITERATE_KEY相关联的副作用函数重新执行
+            iterateEffects && iterateEffects.forEach(effectFn => {
+                //找到当前不存在的属性值所对应的副作用函数
+                if (effectFn !== activeEffect) {
+                    //执行它  因为只有新增属性才满足这个条件
+                    effectsToRun.add(effectFn)
+                }
+            })
+        }
         effectsToRun.forEach((effectFn) => {
             //z
             if (effectFn.options.scheduler) {
@@ -59,7 +61,6 @@
     }
     //cleanup是为了清楚重置effectFn内的deps，它为了重置每次副作用函数执行时的依赖收集，保证了每次的依赖都是当前最新的依赖关系
     function cleanup(effectFn) {
-        debugger
         for (let index = 0; index < effectFn.deps.length; index++) {
             deps = effectFn.deps[index]
             deps.delete(effectFn)
@@ -73,7 +74,6 @@
     //这样能保证嵌套的副作用函数内的副作用函数都执行，不会出现覆盖的情况
     //然后执行完副作用函数的前一定要清空该副作用函数的deps依赖
     function effect(fn, options = {}) {
-        debugger
         const effectFn = () => {
             cleanup(effectFn)
             activeEffect = effectFn
@@ -173,56 +173,76 @@
         }
         return value
     }
-    // =================
-    // 计算属性的实际使用demo
-    // const sumRes = computed(() => obj.foo + obj.bar)
+    //封装响应式函数reactive
+    function reactive(obj) {
+        return new Proxy(obj, {
+            get(target, key,receiver) {
+                debugger
+                //child.row === obj true
+                //parent.row === proto true
+                //recevier始终执行的是代理对象child，代理对象可以通过raw属性读取原始数据
+                // if (key === 'raw') {
+                //     return target
+                // }
+                track(target, key)
+                //为了解决代理对象内部this指针的问题，因为Reflect的第三个参数可以指定指针
+                // Reflect 是一个内置的对象，它提供拦截 JavaScript 操作的方法。这些方法与proxy handlers (en-US)的方法相同。Reflect不是一个函数对象，因此它是不可构造的。
+                return Reflect.get(target, key, receiver)
+            },
+            deleteProperty(target, key) {
+                return Reflect.deleteProperty(target, key)
+            },
+            set(target, key, newVal,receiver) {
+                //先获取旧的值，为合理触发相应事做准备
+                const oldVal = target[key]
 
-    // console.log(sumRes.value)
-    // console.log(sumRes.value)
+                // 如果属性不存在，则说明是在添加新的属性，否则是设置已存在的属性
+                const type = Object.prototype.hasOwnProperty.call(target, key) ? 'SET' : 'ADD'
+                // 设置属性值
+                const res = Reflect.set(target, key, newVal, receiver)
+                //只出发源数据是代理对象的响应式，解决原型链继承所带来的问题，但其实它的响应式不需要继承对象来触发。
+                // if(target === receiver.raw){
+                    debugger
+                    if(oldVal!==newVal&&(oldVal===oldVal||newVal===newVal)){
+                        trigger(target, key, type)
+                    }
+                // }
+                //为了兼容函数类型
+                return res
+            },
+            //对于'foo' in p这种in操作符的拦截
+            has(target, key) {
+                track(target, key)
+                return Reflect.has(target, key)
+            },
+            //对于for in中的循环的拦截
+            ownKeys(target) {
+                track(target, ITERATE_KEY)
+                return Reflect.ownKeys(target)
+            }
 
-    // obj.foo++
-
-    // console.log(sumRes.value)
-
-    // effect(() => {
-    // console.log(sumRes.value)
-    // })
-
-    // obj.foo++
-    // =========================
-    //wacth的实际使用demo
-
-
-    let count = 0
-    function fetch() {
-    count++
-    const res = count === 1 ? 'A' : 'B'
-    return new Promise(resolve => {
-        setTimeout(() => {
-        resolve(res)
-        }, count === 1 ? 1000 : 100);
-    })
+        })
     }
 
-    let finallyData
-    watch(() => obj.foo, async (newVal, oldVal, onInvalidate) => {
-        //定义一个标识，代表当前副作用函数是否过期，默认为false，代表没有过期
-        let valid = true
-        //调用onInvalidate()函数注册一个过期回调
-        onInvalidate(() => {
-            valid = false
-        })
-        const res = await fetch()
+    // =================
 
-        if (!valid) return
+    // =================================================================
+    const obj = { foo: 1 }
+    const child = reactive(obj)
+    const parent = reactive({ bar: 2 })
+    //使用parent作为child的原型，即继承parent的属性
+    Object.setPrototypeOf(child, parent)
 
-        finallyData = res
-             console.log(finallyData)
-        })
+    console.log('asdfasf', Object.getPrototypeOf(obj) === parent)
 
-    setTimeout(() => {
-        obj.foo++
-    }, 1000)
+    effect(() => {
+    console.log(child.bar)
+    })
+
+    child.bar = 3
+    obj.bar = 3
+
+
 
 
 </script>

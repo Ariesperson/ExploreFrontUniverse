@@ -1,0 +1,346 @@
+<body></body>
+<script>
+    //全局响应式存储weakmap
+    const bucket = new WeakMap()
+    //临时存储副作用函数的变量
+    let activeEffect
+    //副作用函数栈 是为了解决嵌套副作用函数的时候后面的会覆盖前面的的问题
+    const effectStack = []
+    //响应式全局的symbol key 这个专门用于最终和触发for in响应式的
+    const ITERATE_KEY = Symbol()
+    //get时的拦截响应式追踪函数 根据target获取到对应的Map 然后再根据key获取到对应的Set 如果都是不存在初始化  
+    //之后将当前的副作用函数存储到deps里同时在当前的副作用函数的deps内将当前的副作用函数存储进去，它是为了收集当前副作用函数的依赖。
+    function track(target, key) {
+        if (!activeEffect) return
+        let depsMap = bucket.get(target)
+        if (!depsMap) {
+            bucket.set(target, (depsMap = new Map()))
+        }
+        let deps = depsMap.get(key)
+        if (!deps) {
+            depsMap.set(key, (deps = new Set()))
+        }
+        deps.add(activeEffect)
+        activeEffect.deps.push(deps)
+    }
+    //trigger是响应式的触发器 即根据target和key从bucket内拿到对应的储存的副作用函数的set并执行它，为了解决执行完副作用函数之后依赖又被收集而导致的无限执行的问题，我们创建
+    //我们创建了一个effectstoRun的set集合来存储并执行副作用函数，这样在一次trigger内只会遍历一次，并不会无限遍历下去因为源数据set集合并不会因为副作用函数的执行而收集新的依赖。
+    function trigger(target,key,type,newVal) {
+        let depsMap = bucket.get(target)
+        if (!depsMap) {
+            return
+        }
+        const effects = depsMap.get(key)
+        const effectsToRun = new Set()
+      
+        // for in 操作需要执行的副作用函数
+        effects && effects.forEach(effectFn => {
+            if (activeEffect != effectFn) {
+                effectsToRun.add(effectFn)
+            }
+        });
+        //如果是非数组的新增操作或者时删除操作时
+        if (type === 'ADD'|| type === 'DELETE') {
+            const iterateEffects = depsMap.get(ITERATE_KEY)
+            //只有当操作为ADD的时候，才触发与ITERATE_KEY相关联的副作用函数重新执行
+            iterateEffects && iterateEffects.forEach(effectFn => {
+                //找到当前不存在的属性值所对应的副作用函数
+                if (effectFn !== activeEffect) {
+                    //执行它  因为只有新增属性才满足这个条件
+                    effectsToRun.add(effectFn)
+                }
+            })
+        }
+        //如果是新增属性的操作
+        if (type === 'ADD'&& Array.isArray(target)) {
+            //只有当操作为ADD的时候，且为数组时
+            const lengthEffects = depsMap.get('length')
+                lengthEffects && lengthEffects.forEach(effectFn => {
+                if (effectFn !== activeEffect) {
+                    effectsToRun.add(effectFn)
+                }
+            })
+        }
+        
+        if (Array.isArray(target) && key === 'length') {
+            debugger
+            depsMap.forEach((effects, key) => {
+            if (key >= newVal) {
+                effects.forEach(effectFn => {
+                if (effectFn !== activeEffect) {
+                    effectsToRun.add(effectFn)
+                }
+                })
+            }
+            })
+        }
+
+        effectsToRun.forEach((effectFn) => {
+            if (effectFn.options.scheduler) {
+                effectFn.options.scheduler(effectFn)
+            } else {
+                effectFn()
+            }
+        })
+    }
+    //cleanup是为了清楚重置effectFn内的deps，它为了重置每次副作用函数执行时的依赖收集，保证了每次的依赖都是当前最新的依赖关系
+    function cleanup(effectFn) {
+        for (let index = 0; index < effectFn.deps.length; index++) {
+            deps = effectFn.deps[index]
+            deps.delete(effectFn)
+        }
+        effectFn.deps.length = 0
+
+    }
+    //effect 封装副作用函数的函数，为了让副作用函数作为匿名函数传进来同时执行副作用函数
+    //调用cleanup清楚了依赖关系，保证这次执行后依赖关系时最新的。
+    //思路时 每次执行前先清楚当前副作用函数的依赖收集 然后将当前副作用函数放入全局的effectstack内，然后再执行，执行完后要将栈出栈同时栈的大小进行修改，栈顶移动。 
+    //这样能保证嵌套的副作用函数内的副作用函数都执行，不会出现覆盖的情况
+    //然后执行完副作用函数的前一定要清空该副作用函数的deps依赖
+    function effect(fn, options = {}) {
+        const effectFn = () => {
+            cleanup(effectFn)
+            activeEffect = effectFn
+            effectStack.push(effectFn)
+            const res = fn()
+            effectStack.pop()
+            activeEffect = effectStack[effectStack.length - 1]
+            return res
+        }
+        effectFn.options = options
+        effectFn.deps = []
+        if (!options.lazy) {
+            effectFn()
+        }
+        return effectFn
+    }
+    //计算属性
+    function computed(getter) {
+        //这里的getter就是我们写的计算属性内部的那个函数
+        let value //这个value值作为缓存值
+        let dirty = true //这个作为是否重新计算的标识
+        //使用副作用函数装饰一下getter
+        const effectFn = effect(getter, {
+            lazy: true,
+            scheduler() {
+                if (!dirty) {
+                    dirty = true
+                    trigger(obj, 'value')
+                }
+            }
+        })
+        //计算属性函数会返回一个对象，这个对象的value属性时一个访问器属性，只有当读取value值的时候才会触发get value内的逻辑。
+        const obj = {
+            get value() {
+                if (dirty) {
+                    //如果dirty才重新计算
+                    value = effectFn()
+                    dirty = false
+                }
+                track(obj, 'value')
+                return value
+            }
+        }
+        return obj
+    }
+
+    //watch监听 调用watch这个方法的时候其实上第一次走到最后相当于时去触发了一次getter 然后getter去触发了track ，而这时收集的依赖是带有options的
+    //之后每一次obj的set被触发时都会拿到带有调度及的副作用函数，即都会执行调度器内函数内的逻辑，可以理解成响应式数据的正常流里多加了一个流程，这个流程就是调度器内的内容。
+    function watch(source, callback, options = {}) {
+        let getter
+        if (typeof source === 'function') {
+            getter = source
+        } else {
+            getter = () => {
+                //递归读取值 因为读取值的话就会建立响应式 依赖就会被收集，当source的值改变时，就会触发trigger,因为它有调度器所以会执行调度器的callback
+                traverse(source)
+            }
+        }
+        let cleanup
+        function onInvalidate(fn) {
+            cleanup = fn
+        }
+        const job = () => {
+            newValue = effectFn()
+            //透传用户自定义的callback
+            callback(newValue, oldValue,onInvalidate)
+            //旧值变新值
+            oldValue = newValue
+        }
+        //定义旧值和新值
+        let newValue, oldValue
+        const effectFn = effect(getter, {
+            lazy: true,
+            scheduler() {
+                // 放入微任务队列
+                if (options.flush === 'post') {
+                    const p = Promise.resolve()
+                    p.then(job)
+                } else {
+                    job()
+                }
+            }
+        })
+        //手动调用副作用函数，拿到的值就是旧值
+        if (options.immediate) {
+            job()
+        } else {
+            oldValue = effectFn()
+        }
+    }
+    //递归读取值
+    function traverse(value, seen = new Set()) {
+        if (typeof value !== 'object' || value === null || seen.has(value)) return
+        seen.add(value)
+        for (const key in value) {
+            traverse(value[key], seen)
+        }
+        return value
+    }
+    //深响应
+    function reactive(obj) {
+        return createReactive(obj)
+    }
+    //浅响应
+    function shallowReactive(params) {
+        return createReactive(obj,true)
+    }
+    //只读
+    function readonly(params) {
+        return createReactive(obj,false,true)
+    }
+    //只读
+    function readonly(params) {
+        return createReactive(obj,false,true)
+    }
+    //浅只读
+    function shallowReadonly(params) {
+        return createReactive(obj,true,true)
+    }
+    //封装响应式函数 createReactive
+
+    function createReactive(obj,isShallow=false,isReadonly=false) {
+        return new Proxy(obj, {
+            get(target, key,receiver) {
+                console.log('get: ', key)
+                //child.row === obj true
+                //parent.row === proto true
+                //recevier始终执行的是代理对象child，代理对象可以通过raw属性读取原始数据
+                if (key === 'raw') {
+                    return target
+                }
+                if(!isReadonly){
+                    track(target, key)
+                }
+                //为了解决代理对象内部this指针的问题，因为Reflect的第三个参数可以指定指针
+                // Reflect 是一个内置的对象，它提供拦截 JavaScript 操作的方法。这些方法与proxy handlers (en-US)的方法相同。Reflect不是一个函数对象，因此它是不可构造的。
+                const res =  Reflect.get(target, key, receiver)
+                if(isShallow){
+                    return res
+                }
+                if(typeof res === 'object'&&res !== null){
+                    return isReadonly ? readonly(res) : reactive(res)
+                }
+                return res
+            },
+            deleteProperty(target, key) {
+                if (isReadonly) {
+                    console.warn(`属性 ${key} 是只读的`)
+                    return true
+                }
+                const hadKey = Object.prototype.hasOwnProperty.call(target, key)
+                const res = Reflect.deleteProperty(target, key)
+
+                if (res && hadKey) {
+                    trigger(target, key, 'DELETE')
+                }
+
+                return res
+            },
+            set(target, key, newVal,receiver) {
+                console.log('set: ', key )
+                if(isReadonly){
+                    console.log(`属性${key}是只能读取的`)
+                    return true
+                }
+                //先获取旧的值，为合理触发相应事做准备
+                const oldVal = target[key]
+
+                // 如果属性不存在，则说明是在添加新的属性，否则是设置已存在的属性
+                const type = Array.isArray(target)? 
+                Number(key)<target.length? 'SET' : 'ADD'
+                :
+                Object.prototype.hasOwnProperty.call(target, key) ? 'SET' : 'ADD'
+                // 设置属性值
+                const res = Reflect.set(target, key, newVal, receiver)
+                //只触发源数据是代理对象的响应式，解决原型链继承所带来的问题，但其实它的响应式不需要继承对象来触发。
+                if(target === receiver.raw){
+                    if(oldVal!==newVal&&(oldVal===oldVal||newVal===newVal)){
+                        trigger(target, key,type, newVal)
+                    }
+                }
+                //为了兼容函数类型
+                return res
+            },
+            //对于'foo' in p这种in操作符的拦截
+            has(target, key) {
+                track(target, key)
+                return Reflect.has(target, key)
+            },
+            //对于for in中的循环的拦截
+            ownKeys(target) {
+                console.log('ownkeys: ')
+                //与常规对象不同的是数组通过length来建立关系
+                let keytype = Array.isArray(target)? 'length' : ITERATE_KEY
+                track(target, keytype)
+                return Reflect.ownKeys(target)
+            }
+
+        })
+    }
+
+    // =================
+
+
+    // const arr = reactive(['foo'])
+
+    // effect(() => {
+    //     console.log(arr.length)
+    // })
+
+    // arr[1] = 'bar'
+    // // arr.length = 0
+    // arr.pop()
+    // const arr = reactive(['foo'])
+
+    // effect(() => {
+    // console.log(arr[0]) // foo
+    // })
+
+    // arr.length = 0
+
+    // const arr = reactive(['foo'])
+
+    // effect(() => {
+    // for (const key in arr) {
+    //     console.log(key)
+    // }
+    // })
+
+    // arr[1] = 'bar'
+    // arr.length = 0
+
+    const arr = reactive([1, 2, 3, 4, 5])
+
+    effect(() => {
+    for (const val of arr.keys()) {
+        console.log(val)
+    }
+    })
+
+    arr[1] = 'bar'
+    arr.length = 0
+
+
+
+</script>

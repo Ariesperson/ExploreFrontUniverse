@@ -1,0 +1,162 @@
+<body></body>
+<script>
+    var bucket = new WeakMap()
+    const ITERATE_KEY = new Symbol()
+    const effectStack = []
+    let activeEffect
+    var obj = {
+        foo:1,
+        bar:2
+    }
+    function tarck(target,key) {
+        let depsMap = bucket.get(target)
+        if(!depsMap){
+           bucket.set(target,(depsMap = new Map()))
+        }   
+        let deps = depsMap.get(key)
+        if(!deps){
+            depsMap.set(key,deps = new Set())
+        }
+        deps.add(activeEffect)
+        activeEffect.deps.push()(deps)
+    }
+    function trigger(target,key,type) {
+        let depsMap = bucket.get(target)
+        if(!depsMap) return
+        let effects = depsMap.get(key)
+        let effectsToRun = new Set()
+        effects && effects.forEach(effectFn => {
+            if (activeEffect != effectFn) {
+                effectsToRun.add(effectFn)
+            }
+        });
+        const iterateEffects = depsMap.get(ITERATE_KEY)
+        if(type=='ADD'){
+            iterateEffects && iterateEffects.forEach(effectFn => {
+                //找到当前不存在的属性值所对应的副作用函数
+                if (effectFn !== activeEffect) {
+                    //执行它  因为只有新增属性才满足这个条件
+                    effectsToRun.add(effectFn)
+                }
+            })
+        }
+        effectsToRun.forEach((effectFn) => {
+            if (effectFn.options.scheduler) {
+                effectFn.options.scheduler(effectFn)
+            } else {
+                effectFn()
+            }
+        })
+    }
+    function cleanup(effectFn) {
+        for (let index = 0; index < effectFn.deps.length; index++) {
+            deps = effectFn.deps[index]
+            deps.delete(effectFn)
+        }
+        effectFn.deps.length = 0
+    }
+    function effect(fn,options) {
+        const effectFn = ()=>{
+            cleanup(effectFn)
+            activeEffect = effectFn
+            effectStack.push(effectFn)
+            const res = fn()
+            effectStack.pop()
+            activeEffect = effectStack[effectStack.length-1]
+            return res
+        }
+        effectFn.options = options
+        effectFn.deps = []
+        if(!options.lazy){
+            effectFn()
+        }
+        return effectFn
+    }
+    function computed(getter) {
+        let value
+        let dirty
+        const effectFn = effect(getter,{
+            lazy:true,
+            scheduler(){
+                if(!dirty){
+                    dirty = true
+                    trigger(obj,'value')
+                }
+            }
+        })
+        const obj = {
+            get value(){
+                if(dirty){
+                    value = effectFn()
+                    dirty = false
+                }
+            }
+        }
+    }
+    function watch(source,callback,options={}){
+        let getter
+        if(typeof source == 'funciton'){
+            getter = source
+        }else{
+            getter = () =>{
+                traverse(source)
+            }
+        }
+        let cleanup
+        function onInvalidate(fn) {
+            cleanup = fn
+        }
+        const job = ()=>{
+            newValue = effectFn()
+            callback(newValue,oldValue,onInvalidate)
+            oldValue = newValue
+        }
+        let newValue,oldValue
+        const effectFn = effect(getter,{
+            lazy:true,
+            scheduler(){
+                if(options.flush=='post'){
+                    const p = Promise.resolve()
+                    p.then(job)
+                }else{
+                    job()
+                }
+            }
+        })
+        if(options.immediate){
+            job()
+        }else{
+            oldValue = effectFn()
+        }
+    }
+    function traverse(value,seen = new Set()){
+        if (typeof value !== 'object' || value === null || seen.has(value)) 
+        return
+        seen.add(value)
+        for (const key in value) {
+            traverse(value[key], seen)
+        }
+        return value
+    }
+    const data = new Proxy(obj,{
+        get(target,key,recevier){
+            track(target,key)
+            return Reflect.get(target,key,recevier)
+        },  
+        set(target,key,newVal,receiver){
+            const type = Object.prototype.hasOwnProperty(target,key)?'SET':'ADD'
+            const res = Reflect.set(target,key,newVal,receiver)
+            trigger(target,key,type)
+            return res
+        },
+        has(target,key){
+            track(target,key)
+            return Reflect.has(target,key)
+        },
+        ownKeys(target){
+            tarck(target,ITERATE_KEY)
+            return Reflect.ownKeys(target)
+        },
+    
+    })
+</script>
