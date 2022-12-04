@@ -1,0 +1,121 @@
+<body></body>
+<script>
+    //全局响应式存储weakmap
+    const bucket = new WeakMap()
+    //临时存储副作用函数的变量
+    let activeEffect
+    //副作用函数栈 是为了解决嵌套副作用函数的时候后面的会覆盖前面的的问题
+    const effectStack = []
+    const data = { foo: 1, bar: 2 }
+    const ITERATE_KEY = new Symbol
+    function track(target,key){
+        let depsMap = bucket.get(target)
+        if(!depsMap){
+            bucket.set(target,(new Map()))
+        }
+        let deps = depsMap.get(key)
+        if(!deps){
+            depsMap.set(key,(new Set()))
+        }
+        deps.add(activeEffect)
+        activeEffect.deps.push(deps)
+    }
+    function trigger(target,key,newVal,receiver){
+        let depsMap = bucket.get(target)
+        if(!depsMap){
+            return
+        }
+        const iterateEffects = depsMap.get(ITERATE_KEY)
+        let effects = depsMap.get(key)
+        let effectsToRun = new Set()
+        if(type==='ADD'){
+            iterateEffects&&iterateEffects.forEach(element => {
+            if(activeEffect!=element){
+                effectsToRun.add(element)
+            }
+        });
+        }
+        effects&&effects.forEach(element => {
+            if(activeEffect!=element){
+                effectsToRun.add(element)
+            }
+        });
+        effectsToRun&&effectsToRun.forEach(element => {
+            if(element.options.scheduler){
+                element.options.scheduler(element)
+            }else{
+                effectsToRun()
+            }   
+        });
+    }
+    function cleanup(effectFn) {
+        for (let i = 0; i < effectFn.length; i++) {
+            const deps = effectFn[i].deps
+            deps.delete(effectFn)
+        }
+        effectFn.deps.length=0
+    }
+    function computed(getter){
+        let value
+        let dirty
+        const effectFn = effect(getter,{
+            lazy:true,
+            scheduler(){
+                if(!dirty){
+                    dirty = true
+                    trigger(obj,'value')
+                }
+            }
+        })
+        const obj = {
+            get value(){
+                if(dirty){
+                    value = effectFn()
+                    dirty = false
+                }
+                track(obj , 'value')
+                return value
+            }
+        }
+    }
+    function watch(){
+
+    }
+    function effect(fn,options={}){
+        const effectFn = ()=>{
+            cleanup(effectFn)
+            activeEffect = effectFn
+            effectStack.push(effectFn)
+            const res = fn()
+            effectStack.pop
+            activeEffect = effectStack[effectStack.length-1]
+            return res
+        }
+        effectFn.options = options
+        effectFn.deps=[]
+        if(!options.lazy){
+            effectFn()
+        }
+        return effectFn
+    }
+    const obj = new Proxy(data,{
+        get(target,key){
+            track(tareget,key)
+            return target[key]
+        },
+        set(target,key,newVal,receiver){
+            const type = Object.prototype.hasOwnProperty(key)?'SET':'ADD'
+            const res  = Reflect.set(target,key,newVal,receiver)
+            trigger(target,key,type)
+            return res
+        },
+        has(target,key){
+            return Reflect.has(target,key)
+        },
+        ownKeys(target){
+            return Reflect.ownKeys(target,ITERATE_KEY)
+        }
+    })
+
+
+</script>

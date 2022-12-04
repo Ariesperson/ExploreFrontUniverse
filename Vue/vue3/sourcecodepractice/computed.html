@@ -1,0 +1,137 @@
+<body></body>
+<script>
+    //全局响应式存储weakmap
+    const bucket = new WeakMap()
+    //临时存储副作用函数的变量
+    let activeEffect 
+    //副作用函数栈 是为了解决嵌套副作用函数的时候后面的会覆盖前面的的问题
+    const effectStack = []
+    const data = { foo: 1, bar: 2 }
+    const obj = new Proxy(data, {
+        get(target, key) {
+            track(target, key)
+            return target[key]
+        },
+        set(target, key, newVal) {
+            target[key] = newVal
+            trigger(target, key)
+        }
+
+    })
+    //get时的拦截响应式追踪函数 根据target获取到对应的Map 然后再根据key获取到对应的Set 如果都是不存在初始化  
+    //之后将当前的副作用函数存储到deps里同时在当前的副作用函数的deps内将当前的副作用函数存储进去，它是为了收集当前副作用函数的依赖。
+    function track(target, key) {
+        if (!activeEffect) return
+        let depsMap = bucket.get(target)
+        if (!depsMap) {
+            bucket.set(target, (depsMap = new Map()))
+        }
+        let deps = depsMap.get(key)
+        if (!deps) {
+            depsMap.set(key, (deps = new Set()))
+        }
+        deps.add(activeEffect)
+        activeEffect.deps.push(deps)
+    }
+    //trigger是响应式的触发器 即根据target和key从bucket内拿到对应的储存的副作用函数的set并执行它，为了解决执行完副作用函数之后依赖又被收集而导致的无限执行的问题，我们创建
+    //我们创建了一个effectstoRun的set集合来存储并执行副作用函数，这样在一次trigger内只会遍历一次，并不会无限遍历下去因为源数据set集合并不会因为副作用函数的执行而收集新的依赖。
+    function trigger(target, key) {
+        let depsMap = bucket.get(target)
+        if(!depsMap){
+            return
+        }
+        let effects  = depsMap.get(key)
+        let effectsToRun = new Set()
+        effects&&effects.forEach(effectFn => {
+            if(activeEffect!=effectFn){
+                effectsToRun.add(effectFn)
+            }
+        });
+        effectsToRun.forEach((effectFn)=>{
+            //z
+            if(effectFn.options.scheduler){
+                effectFn.options.scheduler(effectFn)
+            }else{
+                 effectFn()
+            }
+        })
+    }
+    //cleanup是为了清楚重置effectFn内的deps，它为了重置每次副作用函数执行时的依赖收集，保证了每次的依赖都是当前最新的依赖关系
+    function cleanup(effectFn){
+        for (let index = 0; index < effectFn.deps.length; index++) {
+            deps = effectFn.deps[index]
+            deps.delete(effectFn)
+        }
+        effectFn.deps.length = 0
+
+    }
+    //effect 封装副作用函数的函数，为了让副作用函数作为匿名函数传进来同时执行副作用函数
+    //调用cleanup清楚了依赖关系，保证这次执行后依赖关系时最新的。
+    //思路时 每次执行前先清楚当前副作用函数的依赖收集 然后将当前副作用函数放入全局的effectstack内，然后再执行，执行完后要将栈出栈同时栈的大小进行修改，栈顶移动。 
+    //这样能保证嵌套的副作用函数内的副作用函数都执行，不会出现覆盖的情况
+    //然后执行完副作用函数的前一定要清空该副作用函数的deps依赖
+    function effect(fn,options={}){
+        const effectFn = ()=>{
+            cleanup(effectFn)
+            activeEffect = effectFn
+            effectStack.push(effectFn)
+            const res = fn()
+            effectStack.pop()
+            activeEffect=effectStack[effectStack.length-1]
+            return res
+        }
+        effectFn.options = options
+        effectFn.deps = []
+        if(!options.lazy){
+          effectFn()
+        }
+        return effectFn
+    }
+
+// =========================
+
+function computed(getter) {
+    //这里的getter就是我们写的计算属性内部的那个函数
+    let value //这个value值作为缓存值
+    let dirty=true //这个作为是否重新计算的标识
+    //使用副作用函数装饰一下getter
+    const effectFn = effect(getter, {
+        lazy: true,
+        scheduler() {
+            if (!dirty) {
+                dirty = true
+                trigger(obj, 'value')
+            }
+        }
+  } )
+  //计算属性函数会返回一个对象，这个对象的value属性时一个访问器属性，只有当读取value值的时候才会处罚get value内的逻辑。
+    const obj = {
+        get value(){
+            if(dirty){
+                //如果dirty才重新计算
+                value = effectFn()
+                dirty = false
+            }
+            track(obj,'value')
+            return value
+        }
+    }
+    return obj
+}
+
+const sumRes = computed(() => obj.foo + obj.bar)
+
+console.log(sumRes.value)
+console.log(sumRes.value)
+
+obj.foo++
+
+console.log(sumRes.value)
+
+effect(() => {
+  console.log(sumRes.value)
+})
+
+obj.foo++
+
+</script>
