@@ -15,9 +15,12 @@ function shouldSetAsProps(el, key, value) {
 //这个函数是将三种class的形式最终都转换为字符串
 function normalizeClass() {
     //判断1 为字符串直接返回
+
     //判断2 将object所对应的结果转成字符串值
+    
     //判断3 将arr所对应的鸡过转换成字符串值
 }
+
 function createRenderer(options) {
 
   const {
@@ -27,7 +30,7 @@ function createRenderer(options) {
     patchProps
   } = options
   function mountElement(vnode, container) {
-    const el = createElement(vnode.type)
+    const el = vnode.el = createElement(vnode.type)
     //如果children是字符串类型则直接当成文本挂载
     if (typeof vnode.children === 'string') {
       setElementText(el, vnode.children)
@@ -47,11 +50,43 @@ function createRenderer(options) {
     insert(el, container)
   }
 
+
+  function patchElement(n1, n2) {
+    const el = n2.el = n1.el
+    const oldProps = n1.props
+    const newProps = n2.props
+    
+    for (const key in newProps) {
+      if (newProps[key] !== oldProps[key]) {
+        patchProps(el, key, oldProps[key], newProps[key])
+      }
+    }
+    for (const key in oldProps) {
+      if (!(key in newProps)) {
+        patchProps(el, key, oldProps[key], null)
+      }
+    }
+  }
+
   function patch(n1, n2, container) {
-    if (!n1) {
-      mountElement(n2, container)
-    } else {
-      //
+    debugger
+    if(n1&&n1.type!==n2.type){
+        unmount(n1)
+        n1 = null
+    }
+    const { type } = n2
+    // 普通标签的类型
+    if (typeof type === 'string') {
+        if (!n1) {
+            //走挂载流程
+        mountElement(n2, container)
+        } else {
+        //走更新流程
+        patchElement(n1, n2)
+        }
+    }
+    // 组件类型
+    else if (typeof type === 'object') {
     }
   }
 
@@ -63,11 +98,17 @@ function createRenderer(options) {
       if (container._vnode) {
         // 旧 vnode 存在，且新 vnode 不存在，说明是卸载(unmount)操作
         // 只需要将 container 内的 DOM 清空即可
-        container.innerHTML = ''
+        unmount(container._vnode)
       }
     }
     // 把 vnode 存储到 container._vnode 下，即后续渲染中的旧 vnode
     container._vnode = vnode
+  }
+  function unmount(vnode) {
+    const parent  = vnode.el.parentNode
+    if(parent){
+      parent.removeChild(vnode.el)
+    }
   }
   
   return {
@@ -89,8 +130,9 @@ const renderer = createRenderer({
     if (key === 'class') {
       el.className = nextValue
     }else if(key === 'style') {
-        
-    }else if (shouldSetAsProps(el, key, nextValue)) {
+
+    }
+    else if (shouldSetAsProps(el, key, nextValue)) {
       const type = typeof el[key]
       if (type === 'boolean' && nextValue === '') {
         el[key] = true
@@ -104,13 +146,23 @@ const renderer = createRenderer({
 })
 
 const vnode = {
-  type: 'button',
+  type: 'p',
   props: {
-    disabled: ''
+    class: 'foo bar baz'
   },
-  children: 'Button'
+  children: 'text'
 }
 renderer.render(vnode, document.querySelector('#app'))
 
+const newVnode = {
+  type: 'div',
+  props: {
+    id: 'foo'
+  },
+  children: 'hello'
+}
+setTimeout(() => {
+  renderer.render(newVnode, document.querySelector('#app'))  
+}, 1000);
 
 </script>

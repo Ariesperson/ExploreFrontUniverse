@@ -69,12 +69,24 @@ function createRenderer(options) {
   }
 
   function patch(n1, n2, container) {
-    if (!n1) {
-        //走挂载流程
-      mountElement(n2, container)
-    } else {
-      //走更新流程
-      patchElement(n1, n2)
+    debugger
+    if(n1&&n1.type!==n2.type){
+        unmount(n1)
+        n1 = null
+    }
+    const { type } = n2
+    // 普通标签的类型
+    if (typeof type === 'string') {
+        if (!n1) {
+            //走挂载流程
+        mountElement(n2, container)
+        } else {
+        //走更新流程
+        patchElement(n1, n2)
+        }
+    }
+    // 组件类型
+    else if (typeof type === 'object') {
     }
   }
 
@@ -115,11 +127,50 @@ const renderer = createRenderer({
     parent.insertBefore(el, anchor)
   },
   patchProps(el, key, preValue, nextValue) {
-    if (key === 'class') {
+    //event事件
+    if (/^on/.test(key)) {
+      const invokers = el._vei || (el._vei = {})
+      let invoker = invokers[key]
+      //因为原生的dom事件都是小写所以需要转换成小写
+      const name = key.slice(2).toLowerCase()
+      if (nextValue) {
+        if (!invoker) {
+          //不存在invoker说明是第一次绑定
+          invoker = el._vei[key] = (e) => {
+            console.log(e.timeStamp)
+            console.log(invoker.attached)
+            //e.timeStamp是事件发生的时间 所以这个判断阻止了事件的冒泡
+            if (e.timeStamp < invoker.attached) return
+            if (Array.isArray(invoker.value)) {
+              //当伪造的事件处理函数执行时会执行真正该事件处理函数
+              invoker.value.forEach(fn => fn(e))
+            } else {
+              //当伪造的事件处理函数执行时会执行真正该事件处理函数
+              invoker.value(e)
+            }
+          }
+          invoker.value = nextValue
+          //添加invoker.attached属性，存储事件处理函数被绑定的事件
+          invoker.attached = performance.now()
+          el.addEventListener(name, invoker)
+        } else {
+          //存在则直接更换绑定的函数即可
+          invoker.value = nextValue
+        }
+      } else if (invoker) {
+        //新的不存在时间函数，移除绑定
+        el.removeEventListener(name, invoker)
+      }
+    }
+    //class属性
+    else if (key === 'class') {
       el.className = nextValue
-    }else if(key === 'style') {
+    }
+    //style属性
+    else if(key === 'style') {
 
     }
+    //表单属性
     else if (shouldSetAsProps(el, key, nextValue)) {
       const type = typeof el[key]
       if (type === 'boolean' && nextValue === '') {
@@ -132,15 +183,32 @@ const renderer = createRenderer({
     }
   }
 })
-const vnode = {
-  type: 'p',
-  props: {
-    class: 'foo bar baz'
-  },
-  children: 'text'
-}
-renderer.render(vnode, document.querySelector('#app'))
-renderer.render(null, document.querySelector('#app'))
 
+const { effect, ref } = VueReactivity
+
+const bol = ref(false)
+
+effect(() => {
+  const vnode = {
+    type: 'div',
+    props: bol.value ? {
+      onClick: () => {
+        alert('父元素 clicked')
+      }
+    } : {},
+    children: [
+      {
+        type: 'p',
+        props: {
+          onClick: () => {
+            bol.value = true
+          }
+        },
+        children: 'text'
+      }
+    ]
+  }
+  renderer.render(vnode, document.querySelector('#app'))
+})
 
 </script>
